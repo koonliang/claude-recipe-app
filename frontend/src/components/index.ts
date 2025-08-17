@@ -5,3 +5,8 @@ export { SuccessMessage } from './SuccessMessage';
 export { default as PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 export { ConfirmationDialog } from './ConfirmationDialog';
 export { LogoutButton } from './LogoutButton';
+export { RecipeCard } from './RecipeCard';
+export { SearchBar } from './SearchBar';
+export { CategoryFilter } from './CategoryFilter';
+export { EmptyState } from './EmptyState';
+export { FloatingActionButton } from './FloatingActionButton';

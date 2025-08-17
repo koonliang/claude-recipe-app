@@ -4,14 +4,19 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
 } from 'react-native';
 import { useAuth } from '@/src/contexts';
-import { LogoutButton } from '@/src/components';
+import { LogoutButton, FloatingActionButton } from '@/src/components';
+import { RecipeListScreen } from '@/src/screens';
 import { colors, typography, spacing } from '@/src/utils/theme';
 
 export default function AuthenticatedHomeScreen() {
   const { user, isLoading, isAnonymous } = useAuth();
+
+  const handleAddRecipe = () => {
+    // TODO: Navigate to recipe creation screen when implemented
+    console.log('Navigate to add recipe');
+  };
 
   if (isLoading) {
     return (
@@ -30,39 +35,27 @@ export default function AuthenticatedHomeScreen() {
           <Text style={styles.demoBannerText}>🔍 Demo Mode - Explore all features!</Text>
         </View>
       )}
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>MyRecipeBox</Text>
-          <Text style={styles.subtitle}>
-            Welcome{isAnonymous ? ' to the demo' : ' back'}, {user?.full_name}!
-          </Text>
-        </View>
+      
+      <View style={styles.header}>
+        <Text style={styles.title}>MyRecipeBox</Text>
+        <Text style={styles.subtitle}>
+          Welcome{isAnonymous ? ' to the demo' : ' back'}, {user?.full_name}!
+        </Text>
+        <LogoutButton
+          title="Sign Out"
+          variant="link"
+          testID="home-logout-button"
+        />
+      </View>
 
-        <View style={styles.userInfo}>
-          <View style={styles.userCard}>
-            <Text style={styles.userLabel}>User Information</Text>
-            <Text style={styles.userName}>{user?.full_name}</Text>
-            <Text style={styles.userEmail}>{user?.email}</Text>
-          </View>
-        </View>
+      <View style={styles.recipeListContainer}>
+        <RecipeListScreen />
+      </View>
 
-        <View style={styles.recipeSection}>
-          <Text style={styles.sectionTitle}>Your Recipes</Text>
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>
-              Recipe management features will be implemented in future steps.
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.actions}>
-          <LogoutButton
-            title="Sign Out"
-            variant="outline"
-            testID="home-logout-button"
-          />
-        </View>
-      </ScrollView>
+      <FloatingActionButton
+        onPress={handleAddRecipe}
+        testID="add-recipe-fab"
+      />
     </SafeAreaView>
   );
 }
@@ -93,82 +86,27 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.text,
   },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
   header: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
     alignItems: 'center',
-    marginBottom: spacing.xl,
   },
   title: {
-    ...typography.h1,
+    ...typography.h2,
     color: colors.text,
     marginBottom: spacing.xs,
     textAlign: 'center',
   },
   subtitle: {
-    ...typography.h3,
+    ...typography.body,
     color: colors.primary,
     textAlign: 'center',
     fontWeight: '500',
-  },
-  userInfo: {
-    marginBottom: spacing.xl,
-  },
-  userCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  userLabel: {
-    ...typography.caption,
-    color: colors.textSecondary,
     marginBottom: spacing.sm,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
-  userName: {
-    ...typography.h3,
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
-  userEmail: {
-    ...typography.body,
-    color: colors.textSecondary,
-  },
-  recipeSection: {
-    marginBottom: spacing.xl,
-  },
-  sectionTitle: {
-    ...typography.h2,
-    color: colors.text,
-    marginBottom: spacing.lg,
-  },
-  placeholder: {
-    backgroundColor: colors.surface,
-    borderRadius: 8,
-    padding: spacing.xl,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderStyle: 'dashed',
-  },
-  placeholderText: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  actions: {
-    alignItems: 'center',
-    paddingTop: spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+  recipeListContainer: {
+    flex: 1,
   },
 });

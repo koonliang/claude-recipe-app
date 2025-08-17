@@ -1,15 +1,4 @@
-export interface Recipe {
-  id: string;
-  title: string;
-  description: string;
-  ingredients: string[];
-  instructions: string[];
-  prepTime: number;
-  cookTime: number;
-  servings: number;
-  difficulty: 'easy' | 'medium' | 'hard';
-  category: string;
-  imageUrl?: string;
-}
+// Re-export Recipe types from mockData for consistency
+export type { Recipe, Ingredient, RecipeStep } from '@/src/data/mockData';
 
 export * from './auth';
