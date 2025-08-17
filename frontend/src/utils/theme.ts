@@ -1,17 +1,40 @@
 export const colors = {
-  primary: '#FF6B6B',
-  secondary: '#4ECDC4', 
-  accent: '#45B7D1',
-  background: '#F8F9FA',
-  surface: '#FFFFFF',
-  text: '#2C3E50',
-  textSecondary: '#7F8C8D',
-  border: '#E1E8ED',
-  success: '#2ECC71',
-  warning: '#F39C12',
-  error: '#E74C3C',
+  // Orange theme for dark mode
+  primary: '#FF6B35',
+  primaryDark: '#E55A2B',
+  secondary: '#FF8F65', 
+  accent: '#FFB399',
+  
+  // Dark mode backgrounds
+  background: '#121212',
+  surface: '#1E1E1E',
+  surfaceVariant: '#2D2D2D',
+  
+  // Dark mode text
+  text: '#FFFFFF',
+  textSecondary: '#B3B3B3',
+  textDisabled: '#666666',
+  
+  // UI elements
+  border: '#404040',
+  borderLight: '#333333',
+  
+  // Status colors
+  success: '#4CAF50',
+  warning: '#FF9800',
+  error: '#F44336',
+  info: '#2196F3',
+  
+  // Basic colors
   white: '#FFFFFF',
   black: '#000000',
+  
+  // Input specific
+  inputBackground: '#2D2D2D',
+  inputBorder: '#404040',
+  inputBorderFocus: '#FF6B35',
+  inputText: '#FFFFFF',
+  placeholder: '#888888',
 } as const;
 
 export const typography = {

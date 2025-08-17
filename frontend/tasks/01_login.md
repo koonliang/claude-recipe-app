@@ -1,0 +1,148 @@
+# Login Screen Implementation - TODO
+
+**Requirements**: Section 3.1, Step 1 from requirements.md
+
+---
+
+## 📋 Implementation Checklist
+
+### ✅ Core Requirements
+- [ ] **Email Input Field**
+  - Validation: email format using Yup schema
+  - Required field validation
+  - Accessible label and focus states
+  
+- [ ] **Password Input Field** 
+  - Secure text entry (hidden by default)
+  - Show/hide password toggle
+  - Required field validation
+  - Accessible label and focus states
+
+- [ ] **Form Validation**
+  - Empty fields validation
+  - Email format validation using Yup
+  - Real-time validation feedback
+  - Submit button disabled until form is valid
+
+- [ ] **Error Handling**
+  - Display validation errors inline
+  - Handle API errors (incorrect credentials)
+  - Network error handling
+  - Loading states during submission
+
+### 🎨 Design Requirements
+
+- [ ] **Dark Theme Implementation**
+  - Dark background colors
+  - Light text on dark backgrounds
+  - Orange accent color (#FF6B35 or similar)
+  - High contrast for accessibility
+
+- [ ] **Responsive Layout**
+  - Works on phones and tablets
+  - Safe area handling
+  - Keyboard-aware scrolling
+
+- [ ] **Accessibility**
+  - Touch targets ≥ 44px
+  - Screen reader labels
+  - Focus indicators
+  - High contrast ratios
+
+### 🔧 Technical Implementation
+
+- [ ] **Dependencies**
+  - react-hook-form for form state management
+  - yup for validation schemas
+  - @react-native-async-storage/async-storage for JWT storage
+
+- [ ] **API Integration**
+  - POST /auth/signin endpoint ready
+  - Request payload: `{ email, password }`
+  - Response handling: `{ token, user: { id, full_name, email } }`
+  - JWT storage in AsyncStorage
+
+- [ ] **Navigation Flow**
+  - Navigate to Home screen on successful login
+  - Handle authentication state globally
+  - Redirect unauthenticated users to login
+
+### 📁 File Structure
+
+```
+src/
+├── components/
+│   ├── TextInput/
+│   │   ├── TextInput.tsx
+│   │   └── index.ts
+│   ├── ErrorMessage/
+│   │   ├── ErrorMessage.tsx
+│   │   └── index.ts
+│   └── index.ts (updated)
+├── screens/
+│   ├── LoginScreen/
+│   │   ├── LoginScreen.tsx
+│   │   └── index.ts
+│   └── index.ts (updated)
+├── services/
+│   ├── auth.ts
+│   └── storage.ts
+├── types/
+│   ├── auth.ts
+│   └── index.ts (updated)
+└── utils/
+    └── theme.ts (updated for dark mode)
+```
+
+### 🧪 Testing Requirements
+
+- [ ] **Component Tests**
+  - Form validation behavior
+  - Error state handling
+  - Accessibility compliance
+  - Theme application
+
+- [ ] **Integration Tests**
+  - Login flow end-to-end
+  - API error handling
+  - Navigation behavior
+
+### 🎯 Acceptance Criteria
+
+**Given** a user opens the login screen  
+**When** they enter valid email and password  
+**Then** the form validates successfully and enables submit button
+
+**Given** a user submits valid credentials  
+**When** the API responds with success  
+**Then** JWT is stored and user navigates to home screen
+
+**Given** a user submits invalid credentials  
+**When** the API responds with error  
+**Then** appropriate error message is displayed
+
+**Given** a user with invalid email format  
+**When** they blur the email field  
+**Then** email format error is displayed inline
+
+**Given** a user leaves required fields empty  
+**When** they attempt to submit  
+**Then** required field errors are displayed
+
+---
+
+## 🚀 Implementation Priority
+
+1. **Phase 1**: Core form components and validation
+2. **Phase 2**: API integration and JWT storage  
+3. **Phase 3**: Navigation and auth state management
+4. **Phase 4**: Error handling and loading states
+5. **Phase 5**: Theme refinement and accessibility
+
+---
+
+**Dependencies**: None  
+**Estimated Effort**: 4-6 hours  
+**Status**: In Progress  
+**Assignee**: Claude Code  
+**Created**: 2025-08-17

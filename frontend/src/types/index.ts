@@ -12,9 +12,4 @@ export interface Recipe {
   imageUrl?: string;
 }
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  favoriteRecipes: string[];
-}
+export * from './auth';

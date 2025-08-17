@@ -1,23 +1,34 @@
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { router } from 'expo-router';
 import { Button } from '@/src/components';
 import { colors, typography, spacing } from '@/src/utils/theme';
 
 export default function HomeScreen() {
   const handleGetStarted = () => {
-    // Navigation logic here
-    console.log('Getting started...');
+    router.push('/login');
+  };
+
+  const handleGoToLogin = () => {
+    router.push('/login');
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Recipe App</Text>
+        <Text style={styles.title}>MyRecipeBox</Text>
         <Text style={styles.subtitle}>Discover and save your favorite recipes</Text>
         
         <View style={styles.buttonContainer}>
           <Button 
             title="Get Started" 
             onPress={handleGetStarted}
+            fullWidth
+          />
+          
+          <Button 
+            title="Go to Login" 
+            onPress={handleGoToLogin}
+            variant="outline"
             fullWidth
           />
         </View>
