@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -17,7 +16,7 @@ import * as yup from 'yup';
 
 import { Button, TextInput, ErrorMessage } from '@/src/components';
 import { colors, typography, spacing } from '@/src/utils/theme';
-import { authService } from '@/src/services/auth';
+import { useAuth } from '@/src/contexts';
 import { LoginCredentials, AuthError } from '@/src/types';
 
 const loginSchema = yup.object({
@@ -33,7 +32,7 @@ const loginSchema = yup.object({
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoading } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
 
   const {
@@ -50,14 +49,12 @@ export default function LoginScreen() {
   });
 
   const onSubmit = async (data: LoginCredentials) => {
-    setIsLoading(true);
     setAuthError(null);
 
     try {
-      const response = await authService.login(data);
-      console.log('Login successful:', response.user);
-      // Navigation will be handled in step 7
-      Alert.alert('Success', 'Login successful!');
+      await login(data);
+      console.log('Login successful');
+      router.replace('/home');
     } catch (error) {
       console.error('Login error:', error);
       
@@ -67,8 +64,6 @@ export default function LoginScreen() {
       } else {
         setAuthError('An unexpected error occurred. Please try again.');
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
