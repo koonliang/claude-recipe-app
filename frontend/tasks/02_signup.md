@@ -1,0 +1,218 @@
+# Signup Screen Implementation - TODO
+
+**Requirements**: Section 3.1, Step 2 from requirements.md
+
+---
+
+## 📋 Implementation Checklist
+
+### ✅ Core Requirements
+- [ ] **Full Name Input Field**
+  - Validation: minimum length (2 characters)
+  - Required field validation
+  - Trim whitespace and capitalize properly
+  - Accessible label and focus states
+  
+- [ ] **Email Input Field**
+  - Validation: email format using Yup schema
+  - Required field validation
+  - Email uniqueness handling (API error response)
+  - Accessible label and focus states
+  
+- [ ] **Password Input Field** 
+  - Secure text entry (hidden by default)
+  - Show/hide password toggle
+  - Required field validation
+  - Password strength validation and feedback
+  - Accessible label and focus states
+
+- [ ] **Password Strength Feedback**
+  - Real-time strength indicator (weak/medium/strong)
+  - Requirements display (length, special chars, etc.)
+  - Visual progress indicator
+  - Color-coded feedback with accessibility support
+
+- [ ] **Form Validation**
+  - Empty fields validation
+  - Email format validation using Yup
+  - Password strength requirements
+  - Real-time validation feedback
+  - Submit button disabled until form is valid
+
+- [ ] **Error Handling**
+  - Display validation errors inline
+  - Handle API errors (email already exists, weak password)
+  - Network error handling
+  - Loading states during submission
+  - User-friendly error messages
+
+### 🎨 Design Requirements
+
+- [ ] **Dark Theme Implementation**
+  - Dark background colors
+  - Light text on dark backgrounds
+  - Orange accent color (#FF6B35 or similar)
+  - High contrast for accessibility
+  - Password strength indicators with theme-appropriate colors
+
+- [ ] **Responsive Layout**
+  - Works on phones and tablets
+  - Safe area handling
+  - Keyboard-aware scrolling
+  - Form fields stack vertically on small screens
+
+- [ ] **Accessibility**
+  - Touch targets ≥ 44px
+  - Screen reader labels for all form fields
+  - Focus indicators
+  - High contrast ratios
+  - Password strength announcements for screen readers
+
+### 🔧 Technical Implementation
+
+- [ ] **Dependencies**
+  - react-hook-form for form state management
+  - yup for validation schemas
+  - @react-native-async-storage/async-storage for JWT storage
+  - Password strength validation library (or custom implementation)
+
+- [ ] **API Integration**
+  - POST /auth/signup endpoint ready
+  - Request payload: `{ name, email, password }`
+  - Response handling: `{ token, user: { id, full_name, email } }`
+  - JWT storage in AsyncStorage
+  - Handle signup-specific API errors
+
+- [ ] **Navigation Flow**
+  - Navigate to Home screen on successful signup
+  - Handle authentication state globally
+  - Auto-login after successful signup
+  - Link to login screen for existing users
+
+### 📁 File Structure
+
+```
+src/
+├── components/
+│   ├── TextInput/
+│   │   ├── TextInput.tsx (enhanced for signup)
+│   │   └── index.ts
+│   ├── PasswordStrengthIndicator/
+│   │   ├── PasswordStrengthIndicator.tsx
+│   │   └── index.ts
+│   ├── ErrorMessage/
+│   │   ├── ErrorMessage.tsx
+│   │   └── index.ts
+│   └── index.ts (updated)
+├── screens/
+│   ├── SignupScreen/
+│   │   ├── SignupScreen.tsx
+│   │   └── index.ts
+│   └── index.ts (updated)
+├── services/
+│   ├── auth.ts (add signup method)
+│   └── storage.ts
+├── types/
+│   ├── auth.ts (add signup types)
+│   └── index.ts (updated)
+├── utils/
+│   ├── theme.ts (updated for dark mode)
+│   └── passwordValidation.ts (new)
+└── validation/
+    └── signupSchema.ts (new)
+```
+
+### 🧪 Testing Requirements
+
+- [ ] **Component Tests**
+  - Form validation behavior
+  - Password strength indicator functionality
+  - Error state handling
+  - Accessibility compliance
+  - Theme application
+
+- [ ] **Integration Tests**
+  - Signup flow end-to-end
+  - API error handling
+  - Navigation behavior
+  - Auto-login after signup
+
+### 🎯 Acceptance Criteria
+
+**Given** a user opens the signup screen  
+**When** they enter valid full name, email and strong password  
+**Then** the form validates successfully and enables submit button
+
+**Given** a user submits valid signup information  
+**When** the API responds with success  
+**Then** JWT is stored and user navigates to home screen automatically
+
+**Given** a user submits an email that already exists  
+**When** the API responds with error  
+**Then** appropriate error message is displayed for email field
+
+**Given** a user enters a weak password  
+**When** they type in the password field  
+**Then** password strength indicator shows weakness and requirements
+
+**Given** a user with invalid email format  
+**When** they blur the email field  
+**Then** email format error is displayed inline
+
+**Given** a user leaves required fields empty  
+**When** they attempt to submit  
+**Then** required field errors are displayed for all empty fields
+
+**Given** a user enters a full name with less than 2 characters  
+**When** they blur the name field  
+**Then** minimum length error is displayed
+
+**Given** a user successfully signs up  
+**When** they are redirected to home  
+**Then** they are automatically authenticated without needing to login
+
+### 🔐 Password Strength Requirements
+
+- [ ] **Minimum Requirements**
+  - At least 8 characters long
+  - Contains at least one uppercase letter
+  - Contains at least one lowercase letter
+  - Contains at least one number
+  - Contains at least one special character
+
+- [ ] **Strength Levels**
+  - **Weak**: Meets minimum length only
+  - **Medium**: Meets 3-4 requirements
+  - **Strong**: Meets all requirements + longer than 12 characters
+
+- [ ] **Visual Feedback**
+  - Progress bar or color indicator
+  - List of requirements with checkmarks
+  - Real-time updates as user types
+
+---
+
+## 🚀 Implementation Priority
+
+1. **Phase 1**: Core form components (name, email, password inputs)
+2. **Phase 2**: Password strength validation and feedback UI
+3. **Phase 3**: API integration and JWT storage  
+4. **Phase 4**: Navigation and auto-authentication
+5. **Phase 5**: Error handling and loading states
+6. **Phase 6**: Theme refinement and accessibility enhancements
+
+---
+
+## 🔗 Related Screens
+
+- **Login Screen** (01_login.md) - Link to login for existing users
+- **Home Screen** - Navigation destination after successful signup
+- **Password Reset** - Alternative flow if user forgets password after signup
+
+---
+
+**Dependencies**: None  
+**Estimated Effort**: 5-7 hours  
+**Status**: Not Started  
+**Assignee**: Claude Code  
+**Created**: 2025-08-17

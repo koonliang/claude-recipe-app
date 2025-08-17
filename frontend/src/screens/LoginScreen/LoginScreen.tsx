@@ -8,7 +8,9 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Pressable,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -30,6 +32,7 @@ const loginSchema = yup.object({
 });
 
 export default function LoginScreen() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -72,6 +75,10 @@ export default function LoginScreen() {
   const handleForgotPassword = () => {
     // Will be implemented in future steps
     Alert.alert('Info', 'Password reset feature coming soon!');
+  };
+
+  const navigateToSignup = () => {
+    router.push('/signup');
   };
 
   return (
@@ -155,7 +162,9 @@ export default function LoginScreen() {
             <View style={styles.signupPrompt}>
               <Text style={styles.signupText}>
                 Don&apos;t have an account?{' '}
-                <Text style={styles.signupLink}>Sign up</Text>
+                <Pressable onPress={navigateToSignup}>
+                  <Text style={styles.signupLink}>Sign up</Text>
+                </Pressable>
               </Text>
             </View>
           </View>
