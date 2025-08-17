@@ -9,6 +9,11 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface AnonymousAuthResponse {
+  user: User;
+  isAnonymous: true;
+}
+
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -39,4 +44,5 @@ export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAnonymous: boolean;
 }

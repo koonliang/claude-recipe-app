@@ -2,14 +2,27 @@ import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
 import { Button } from '@/src/components';
 import { colors, typography, spacing } from '@/src/utils/theme';
+import { useAuth } from '@/src/contexts';
+import { isAnonymousModeEnabled } from '@/src/config/appConfig';
 
 export default function HomeScreen() {
+  const { loginAsAnonymous } = useAuth();
+
   const handleGetStarted = () => {
     router.push('/login');
   };
 
   const handleGoToLogin = () => {
     router.push('/login');
+  };
+
+  const handleTryDemo = async () => {
+    try {
+      await loginAsAnonymous();
+      router.replace('/home');
+    } catch (error) {
+      console.error('Failed to start demo:', error);
+    }
   };
 
   return (
@@ -31,6 +44,15 @@ export default function HomeScreen() {
             variant="outline"
             fullWidth
           />
+          
+          {isAnonymousModeEnabled() && (
+            <Button 
+              title="🔍 Try Demo" 
+              onPress={handleTryDemo}
+              variant="secondary"
+              fullWidth
+            />
+          )}
         </View>
       </View>
     </SafeAreaView>

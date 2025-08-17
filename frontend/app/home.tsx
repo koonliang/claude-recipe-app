@@ -11,7 +11,7 @@ import { LogoutButton } from '@/src/components';
 import { colors, typography, spacing } from '@/src/utils/theme';
 
 export default function AuthenticatedHomeScreen() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAnonymous } = useAuth();
 
   if (isLoading) {
     return (
@@ -25,10 +25,17 @@ export default function AuthenticatedHomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {isAnonymous && (
+        <View style={styles.demoBanner}>
+          <Text style={styles.demoBannerText}>🔍 Demo Mode - Explore all features!</Text>
+        </View>
+      )}
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>MyRecipeBox</Text>
-          <Text style={styles.subtitle}>Welcome back, {user?.full_name}!</Text>
+          <Text style={styles.subtitle}>
+            Welcome{isAnonymous ? ' to the demo' : ' back'}, {user?.full_name}!
+          </Text>
         </View>
 
         <View style={styles.userInfo}>
@@ -64,6 +71,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  demoBanner: {
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    alignItems: 'center',
+  },
+  demoBannerText: {
+    ...typography.caption,
+    color: colors.white || '#FFFFFF',
+    fontWeight: '600',
+    textAlign: 'center',
   },
   loadingContainer: {
     flex: 1,

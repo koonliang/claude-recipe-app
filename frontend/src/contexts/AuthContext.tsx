@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { authService } from '@/src/services/auth';
+import { apiService } from '@/src/services/apiService';
 import { User, AuthState, LoginCredentials, SignupData } from '@/src/types';
+import { isAnonymousModeEnabled } from '@/src/config/appConfig';
+import { mockAnonymousUser } from '@/src/data/mockData';
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -9,6 +11,7 @@ interface AuthContextType extends AuthState {
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
   checkAuthState: () => Promise<void>;
+  loginAsAnonymous: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,15 +26,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     token: null,
     isAuthenticated: false,
     isLoading: true,
+    isAnonymous: false,
   });
 
   const checkAuthState = async () => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true }));
       
+      // Check if anonymous mode is enabled and auto-login
+      if (isAnonymousModeEnabled()) {
+        setAuthState({
+          user: mockAnonymousUser,
+          token: null,
+          isAuthenticated: true,
+          isLoading: false,
+          isAnonymous: true,
+        });
+        return;
+      }
+      
       const [token, user] = await Promise.all([
-        authService.getStoredToken(),
-        authService.getStoredUser(),
+        apiService.getStoredToken(),
+        apiService.getStoredUser(),
       ]);
 
       if (token && user) {
@@ -40,6 +56,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           token,
           isAuthenticated: true,
           isLoading: false,
+          isAnonymous: false,
         });
       } else {
         setAuthState({
@@ -47,6 +64,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           token: null,
           isAuthenticated: false,
           isLoading: false,
+          isAnonymous: false,
         });
       }
     } catch (error) {
@@ -56,6 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         token: null,
         isAuthenticated: false,
         isLoading: false,
+        isAnonymous: false,
       });
     }
   };
@@ -64,13 +83,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true }));
       
-      const response = await authService.login(credentials);
+      const response = await apiService.login(credentials);
       
       setAuthState({
         user: response.user,
         token: response.token,
         isAuthenticated: true,
         isLoading: false,
+        isAnonymous: false,
       });
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
@@ -82,13 +102,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true }));
       
-      const response = await authService.signup(userData);
+      const response = await apiService.signup(userData);
       
       setAuthState({
         user: response.user,
         token: response.token,
         isAuthenticated: true,
         isLoading: false,
+        isAnonymous: false,
       });
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
@@ -100,13 +121,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true }));
       
-      await authService.logout();
+      await apiService.logout();
       
       setAuthState({
         user: null,
         token: null,
         isAuthenticated: false,
         isLoading: false,
+        isAnonymous: false,
       });
     } catch (error) {
       // Even if logout fails, clear local state
@@ -115,17 +137,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
         token: null,
         isAuthenticated: false,
         isLoading: false,
+        isAnonymous: false,
       });
       throw error;
     }
   };
 
   const forgotPassword = async (email: string) => {
-    await authService.forgotPassword(email);
+    await apiService.forgotPassword(email);
   };
 
   const resetPassword = async (token: string, newPassword: string) => {
-    await authService.resetPassword(token, newPassword);
+    await apiService.resetPassword(token, newPassword);
+  };
+
+  const loginAsAnonymous = async () => {
+    try {
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+      
+      setAuthState({
+        user: mockAnonymousUser,
+        token: null,
+        isAuthenticated: true,
+        isLoading: false,
+        isAnonymous: true,
+      });
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      throw error;
+    }
   };
 
   useEffect(() => {
@@ -140,6 +180,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     forgotPassword,
     resetPassword,
     checkAuthState,
+    loginAsAnonymous,
   };
 
   return (
