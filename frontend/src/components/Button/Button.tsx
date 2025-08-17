@@ -1,33 +1,46 @@
-import { Pressable, Text, StyleSheet } from 'react-native';
+import React from 'react';
+import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
 import { colors, typography, spacing } from '@/src/utils/theme';
 
-interface ButtonProps {
+export interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'link';
   disabled?: boolean;
   fullWidth?: boolean;
+  loading?: boolean;
+  style?: ViewStyle;
+  testID?: string;
 }
 
-export default function Button({ 
+export function Button({ 
   title, 
   onPress, 
   variant = 'primary', 
   disabled = false,
-  fullWidth = false 
+  fullWidth = false,
+  loading = false,
+  style,
+  testID
 }: ButtonProps) {
+  const isDisabled = disabled || loading;
+  
   return (
     <Pressable
       style={[
         styles.button,
         styles[variant],
-        disabled && styles.disabled,
-        fullWidth && styles.fullWidth
+        isDisabled && styles.disabled,
+        fullWidth && styles.fullWidth,
+        style
       ]}
       onPress={onPress}
-      disabled={disabled}
+      disabled={isDisabled}
+      testID={testID}
     >
-      <Text style={[styles.text, styles[`${variant}Text`]]}>{title}</Text>
+      <Text style={[styles.text, styles[`${variant}Text`]]}>
+        {loading ? 'Loading...' : title}
+      </Text>
     </Pressable>
   );
 }
@@ -52,6 +65,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.primary,
   },
+  link: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingVertical: spacing.xs,
+  },
   disabled: {
     opacity: 0.5,
   },
@@ -69,6 +87,9 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   outlineText: {
+    color: colors.primary,
+  },
+  linkText: {
     color: colors.primary,
   },
 });

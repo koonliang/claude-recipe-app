@@ -3,18 +3,20 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing } from '@/src/utils/theme';
 
-interface ErrorMessageProps {
+export interface ErrorMessageProps {
   message: string;
   visible?: boolean;
   type?: 'error' | 'warning' | 'info';
   showIcon?: boolean;
+  testID?: string;
 }
 
-export default function ErrorMessage({
+export function ErrorMessage({
   message,
   visible = true,
   type = 'error',
   showIcon = true,
+  testID,
 }: ErrorMessageProps) {
   if (!visible || !message) {
     return null;
@@ -47,7 +49,7 @@ export default function ErrorMessage({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID={testID}>
       {showIcon && (
         <Ionicons
           name={getIconName()}

@@ -10,16 +10,17 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing } from '@/src/utils/theme';
 
-interface TextInputProps extends Omit<RNTextInputProps, 'style'> {
+export interface TextInputProps extends Omit<RNTextInputProps, 'style'> {
   label: string;
   error?: string;
   helperText?: string;
   isPassword?: boolean;
   fullWidth?: boolean;
   disabled?: boolean;
+  rightIcon?: React.ReactNode;
 }
 
-export default function TextInput({
+export function TextInput({
   label,
   error,
   helperText,
@@ -28,6 +29,7 @@ export default function TextInput({
   disabled = false,
   value,
   onChangeText,
+  rightIcon,
   ...props
 }: TextInputProps) {
   const [isFocused, setIsFocused] = useState(false);
@@ -76,6 +78,12 @@ export default function TextInput({
               color={colors.textSecondary}
             />
           </Pressable>
+        )}
+        
+        {rightIcon && !isPassword && (
+          <View style={styles.rightIcon}>
+            {rightIcon}
+          </View>
         )}
       </View>
       
@@ -149,5 +157,8 @@ const styles = StyleSheet.create({
   },
   helperTextError: {
     color: colors.error,
+  },
+  rightIcon: {
+    paddingLeft: spacing.xs,
   },
 });

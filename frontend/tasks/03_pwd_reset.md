@@ -1,0 +1,349 @@
+# Password Reset Flow Implementation - TODO
+
+**Requirements**: Section 3.1, Step 3 from requirements.md
+
+---
+
+## 📋 Implementation Checklist
+
+### ✅ Forgot Password Screen
+
+- [ ] **Email Input Field**
+  - Validation: email format using Yup schema
+  - Required field validation
+  - Accessible label and focus states
+  - Clear placeholder text
+  - Auto-focus on screen load
+  
+- [ ] **Request Reset Button**
+  - Disabled until valid email entered
+  - Loading state during API call
+  - Visual feedback on tap
+  - Accessible button with clear label
+
+- [ ] **Form Validation**
+  - Empty email field validation
+  - Email format validation using Yup
+  - Real-time validation feedback
+  - Submit button disabled until email is valid
+
+- [ ] **Success State**
+  - Success message after email sent
+  - Instructions for checking email
+  - Option to resend after timeout
+  - Navigation back to login screen
+
+### ✅ Reset Password Screen
+
+- [ ] **Token Validation**
+  - Extract token from deep link/URL parameter
+  - Validate token format and expiry
+  - Handle invalid/expired token gracefully
+  - Redirect to forgot password if invalid
+
+- [ ] **New Password Input Field**
+  - Secure text entry (hidden by default)
+  - Show/hide password toggle
+  - Required field validation
+  - Password strength validation and feedback
+  - Accessible label and focus states
+
+- [ ] **Confirm Password Input Field**
+  - Secure text entry (hidden by default)
+  - Show/hide password toggle
+  - Password match validation
+  - Real-time confirmation feedback
+  - Accessible label and focus states
+
+- [ ] **Password Strength Feedback**
+  - Real-time strength indicator (weak/medium/strong)
+  - Requirements display (length, special chars, etc.)
+  - Visual progress indicator
+  - Color-coded feedback with accessibility support
+
+- [ ] **Form Validation**
+  - Empty fields validation
+  - Password strength requirements
+  - Password confirmation match
+  - Real-time validation feedback
+  - Submit button disabled until form is valid
+
+- [ ] **Reset Completion**
+  - Success message after password reset
+  - Auto-navigation to login screen
+  - Clear form state
+  - Optional auto-login with new credentials
+
+### 🔗 Navigation & Deep Linking
+
+- [ ] **Forgot Password Link**
+  - Accessible link on Login screen
+  - Navigate to Forgot Password screen
+  - Clear form state on navigation
+
+- [ ] **Deep Link Handling**
+  - Handle password reset URLs from email
+  - Extract token from URL parameters
+  - Navigate to Reset Password screen with token
+  - Handle malformed or missing token URLs
+
+- [ ] **Navigation Flow**
+  - Forgot Password → Success → Back to Login
+  - Reset Password → Success → Navigate to Login
+  - Handle back button navigation appropriately
+  - Clear navigation stack after successful reset
+
+### 🛠️ Error Handling
+
+- [ ] **API Error Handling**
+  - Handle email not found (forgot password)
+  - Handle invalid/expired token (reset password)
+  - Handle network connectivity issues
+  - Handle rate limiting (too many requests)
+  - Display user-friendly error messages
+
+- [ ] **Validation Errors**
+  - Display validation errors inline
+  - Clear error state when user corrects input
+  - Prevent form submission with validation errors
+  - Screen reader announcements for errors
+
+- [ ] **Loading States**
+  - Loading indicators during API calls
+  - Disable form inputs during submission
+  - Timeout handling for slow responses
+  - Cancel request capability if needed
+
+### 🎨 Design Requirements
+
+- [ ] **Dark Theme Implementation**
+  - Dark background colors
+  - Light text on dark backgrounds
+  - Orange accent color (#FF6B35 or similar)
+  - High contrast for accessibility
+  - Password strength indicators with theme-appropriate colors
+
+- [ ] **Responsive Layout**
+  - Works on phones and tablets
+  - Safe area handling
+  - Keyboard-aware scrolling
+  - Form fields stack vertically on small screens
+  - Appropriate spacing and typography
+
+- [ ] **Accessibility**
+  - Touch targets ≥ 44px
+  - Screen reader labels for all form fields
+  - Focus indicators
+  - High contrast ratios
+  - Password strength announcements for screen readers
+  - Clear error message announcements
+
+### 🔧 Technical Implementation
+
+- [ ] **Dependencies**
+  - react-hook-form for form state management
+  - yup for validation schemas
+  - react-navigation for deep linking
+  - @react-native-async-storage/async-storage if needed
+  - Password strength validation library (or custom implementation)
+
+- [ ] **API Integration**
+  - POST /auth/forgot-password endpoint
+    - Request payload: `{ email }`
+    - Handle success/error responses
+  - POST /auth/reset-password endpoint
+    - Request payload: `{ token, newPassword }`
+    - Handle success/error responses
+    - Token validation on backend
+
+- [ ] **Deep Link Configuration**
+  - Configure URL scheme for password reset links
+  - Handle incoming deep links properly
+  - Extract token parameter from URL
+  - Navigate to appropriate screen based on link
+
+### 📁 File Structure
+
+```
+src/
+├── components/
+│   ├── TextInput/
+│   │   ├── TextInput.tsx (enhanced for password reset)
+│   │   └── index.ts
+│   ├── PasswordStrengthIndicator/
+│   │   ├── PasswordStrengthIndicator.tsx (reused from signup)
+│   │   └── index.ts
+│   ├── ErrorMessage/
+│   │   ├── ErrorMessage.tsx (reused)
+│   │   └── index.ts
+│   ├── SuccessMessage/
+│   │   ├── SuccessMessage.tsx (new)
+│   │   └── index.ts
+│   └── index.ts (updated)
+├── screens/
+│   ├── ForgotPasswordScreen/
+│   │   ├── ForgotPasswordScreen.tsx
+│   │   └── index.ts
+│   ├── ResetPasswordScreen/
+│   │   ├── ResetPasswordScreen.tsx
+│   │   └── index.ts
+│   └── index.ts (updated)
+├── services/
+│   ├── auth.ts (add forgot/reset password methods)
+│   └── deepLinking.ts (new)
+├── types/
+│   ├── auth.ts (add password reset types)
+│   └── index.ts (updated)
+├── utils/
+│   ├── theme.ts (reused)
+│   ├── passwordValidation.ts (reused from signup)
+│   └── tokenValidation.ts (new)
+└── validation/
+    ├── forgotPasswordSchema.ts (new)
+    └── resetPasswordSchema.ts (new)
+```
+
+### 🧪 Testing Requirements
+
+- [ ] **Component Tests**
+  - Form validation behavior
+  - Password strength indicator functionality
+  - Error state handling
+  - Success state handling
+  - Deep link token extraction
+  - Accessibility compliance
+
+- [ ] **Integration Tests**
+  - Forgot password flow end-to-end
+  - Reset password flow end-to-end
+  - Deep link navigation
+  - API error handling
+  - Token validation scenarios
+
+- [ ] **Edge Case Tests**
+  - Invalid/expired tokens
+  - Malformed deep links
+  - Network connectivity issues
+  - Rate limiting scenarios
+
+### 🎯 Acceptance Criteria
+
+#### Forgot Password Flow
+
+**Given** a user is on the login screen  
+**When** they tap "Forgot Password" link  
+**Then** they navigate to the forgot password screen
+
+**Given** a user enters a valid email on forgot password screen  
+**When** they submit the form  
+**Then** API call is made and success message is displayed
+
+**Given** a user enters an invalid email format  
+**When** they blur the email field  
+**Then** email format error is displayed inline
+
+**Given** a user submits forgot password request  
+**When** API responds with success  
+**Then** success message with instructions is displayed
+
+**Given** a user submits email that doesn't exist  
+**When** API responds with error  
+**Then** appropriate error message is displayed
+
+#### Reset Password Flow
+
+**Given** a user clicks password reset link in email  
+**When** app opens with valid token  
+**Then** they navigate to reset password screen with token populated
+
+**Given** a user clicks password reset link with invalid token  
+**When** app opens  
+**Then** they see error message and redirect to forgot password screen
+
+**Given** a user enters valid new password and confirmation  
+**When** they submit the reset form  
+**Then** password is reset and they navigate to login screen
+
+**Given** a user enters passwords that don't match  
+**When** they blur the confirm password field  
+**Then** password match error is displayed
+
+**Given** a user enters weak password  
+**When** they type in password field  
+**Then** password strength indicator shows weakness and requirements
+
+**Given** a user successfully resets password  
+**When** they are redirected to login  
+**Then** success message confirms password was reset
+
+### 🔐 Password Reset Security Requirements
+
+- [ ] **Token Security**
+  - Tokens expire after reasonable time (1-2 hours)
+  - Tokens are single-use only
+  - Tokens are cryptographically secure
+  - Invalid tokens handled gracefully
+
+- [ ] **Rate Limiting**
+  - Prevent spam requests for password reset
+  - Limit reset attempts per email/IP
+  - Clear communication about rate limits
+  - Grace period before retry allowed
+
+- [ ] **Password Requirements**
+  - Same strength requirements as signup
+  - Cannot reuse previous password
+  - Immediate invalidation of old sessions
+  - Secure transmission of new password
+
+### 🚨 Error Messages
+
+- [ ] **User-Friendly Messages**
+  - "We'll send a reset link if that email is in our system"
+  - "This reset link has expired. Please request a new one."
+  - "Passwords don't match. Please check your entry."
+  - "Password must be at least 8 characters with mixed case, numbers, and symbols"
+
+### 📱 Deep Link URL Structure
+
+```
+myrecipebox://reset-password?token=<jwt_token>
+```
+
+---
+
+## 🚀 Implementation Priority
+
+1. **Phase 1**: Forgot Password screen with email input and validation
+2. **Phase 2**: API integration for forgot password endpoint
+3. **Phase 3**: Reset Password screen with password inputs
+4. **Phase 4**: Deep link configuration and token handling
+5. **Phase 5**: API integration for reset password endpoint
+6. **Phase 6**: Error handling and loading states
+7. **Phase 7**: Success flows and navigation
+8. **Phase 8**: Security enhancements and edge cases
+
+---
+
+## 🔗 Related Screens
+
+- **Login Screen** (01_login.md) - Entry point and return destination
+- **Signup Screen** (02_signup.md) - Shares password validation components
+- **Home Screen** - Potential destination after successful reset
+
+---
+
+## 🔄 Reusable Components
+
+- **PasswordStrengthIndicator** - Reuse from signup implementation
+- **TextInput** - Enhanced for password reset use cases
+- **ErrorMessage** - Consistent error display
+- **Theme** - Dark mode styling
+
+---
+
+**Dependencies**: Login Screen implementation (01_login.md)  
+**Estimated Effort**: 6-8 hours  
+**Status**: Not Started  
+**Assignee**: Claude Code  
+**Created**: 2025-08-17

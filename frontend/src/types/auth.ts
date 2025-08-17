@@ -25,6 +25,15 @@ export interface AuthError {
   field?: string;
 }
 
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordData {
+  token: string;
+  newPassword: string;
+}
+
 export interface AuthState {
   user: User | null;
   token: string | null;

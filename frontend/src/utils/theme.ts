@@ -91,3 +91,11 @@ export const borderRadius = {
   xl: 16,
   full: 9999,
 } as const;
+
+// Unified theme export
+export const theme = {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+} as const;

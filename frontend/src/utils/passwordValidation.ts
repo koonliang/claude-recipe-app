@@ -77,3 +77,6 @@ export function isPasswordValid(password: string): boolean {
   const strength = validatePasswordStrength(password);
   return strength.requirements.every(req => req.met);
 }
+
+// Alias for backwards compatibility
+export const calculatePasswordStrength = validatePasswordStrength;
