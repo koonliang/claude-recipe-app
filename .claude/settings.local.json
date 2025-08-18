@@ -13,7 +13,9 @@
       "Bash(dotnet build:*)",
       "Bash(export PATH=\"$HOME/.dotnet:$PATH\")",
       "Bash(dotnet --version)",
-      "Bash(dotnet test)"
+      "Bash(dotnet test)",
+      "Bash(find:*)",
+      "Bash(dotnet run:*)"
     ],
     "deny": []
   }
