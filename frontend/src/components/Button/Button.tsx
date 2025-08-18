@@ -3,9 +3,10 @@ import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
 import { colors, typography, spacing } from '@/src/utils/theme';
 
 export interface ButtonProps {
-  title: string;
+  title?: string;
+  children?: React.ReactNode;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'link';
+  variant?: 'primary' | 'secondary' | 'outline' | 'link' | 'danger';
   disabled?: boolean;
   fullWidth?: boolean;
   loading?: boolean;
@@ -15,6 +16,7 @@ export interface ButtonProps {
 
 export function Button({ 
   title, 
+  children,
   onPress, 
   variant = 'primary', 
   disabled = false,
@@ -38,9 +40,11 @@ export function Button({
       disabled={isDisabled}
       testID={testID}
     >
-      <Text style={[styles.text, styles[`${variant}Text`]]}>
-        {loading ? 'Loading...' : title}
-      </Text>
+      {children || (
+        <Text style={[styles.text, styles[`${variant}Text`]]}>
+          {loading ? 'Loading...' : title}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -70,6 +74,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     paddingVertical: spacing.xs,
   },
+  danger: {
+    backgroundColor: '#DC2626',
+  },
   disabled: {
     opacity: 0.5,
   },
@@ -91,5 +98,8 @@ const styles = StyleSheet.create({
   },
   linkText: {
     color: colors.primary,
+  },
+  dangerText: {
+    color: colors.white,
   },
 });

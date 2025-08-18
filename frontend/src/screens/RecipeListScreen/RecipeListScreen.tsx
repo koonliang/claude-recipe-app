@@ -7,6 +7,7 @@ import {
   RefreshControl,
   ListRenderItem,
 } from 'react-native';
+import { router } from 'expo-router';
 import { RecipeCard } from '@/src/components/RecipeCard';
 import { SearchBar } from '@/src/components/SearchBar';
 import { CategoryFilter } from '@/src/components/CategoryFilter';
@@ -34,10 +35,9 @@ export default function RecipeListScreen() {
     search: debouncedSearch,
   });
 
-  const handleRecipePress = (recipe: Recipe) => {
-    // TODO: Navigate to recipe detail screen when implemented
-    console.log('Navigate to recipe:', recipe.id);
-  };
+  const handleRecipePress = useCallback((recipe: Recipe) => {
+    router.push(`/recipe/${recipe.id}` as any);
+  }, []);
 
   const handleClearSearch = () => {
     setSearchText('');

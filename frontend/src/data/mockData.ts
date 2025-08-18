@@ -41,7 +41,7 @@ export const mockRecipes: Recipe[] = [
     title: 'Classic Spaghetti Carbonara',
     description: 'A traditional Italian pasta dish with eggs, cheese, and pancetta',
     category: 'Italian',
-    photo_url: 'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400',
+    photo_url: 'https://therecipecritic.com/wp-content/uploads/2018/04/pasta-carbonara-15.jpg',
     ingredients: [
       { id: 'ing-001', name: 'Spaghetti', quantity: '400', unit: 'g' },
       { id: 'ing-002', name: 'Pancetta', quantity: '150', unit: 'g' },
@@ -142,7 +142,7 @@ export const mockRecipes: Recipe[] = [
     title: 'Beef Tacos',
     description: 'Spicy ground beef tacos with fresh toppings',
     category: 'Mexican',
-    photo_url: 'https://images.unsplash.com/photo-1565299585323-38174c13a4a0?w=400',
+    photo_url: 'https://bing.com/th?id=OSK.142b082b5c3ce860574bd1f2bbf98695',
     ingredients: [
       { id: 'ing-026', name: 'Ground beef', quantity: '500', unit: 'g' },
       { id: 'ing-027', name: 'Taco shells', quantity: '8', unit: 'pieces' },

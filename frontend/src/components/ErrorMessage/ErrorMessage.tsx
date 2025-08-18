@@ -1,13 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, spacing } from '@/src/utils/theme';
+import { colors, typography, spacing, borderRadius } from '@/src/utils/theme';
 
 export interface ErrorMessageProps {
   message: string;
   visible?: boolean;
   type?: 'error' | 'warning' | 'info';
   showIcon?: boolean;
+  onRetry?: () => void;
+  showRetry?: boolean;
   testID?: string;
 }
 
@@ -16,6 +18,8 @@ export function ErrorMessage({
   visible = true,
   type = 'error',
   showIcon = true,
+  onRetry,
+  showRetry = true,
   testID,
 }: ErrorMessageProps) {
   if (!visible || !message) {
@@ -50,27 +54,42 @@ export function ErrorMessage({
 
   return (
     <View style={styles.container} testID={testID}>
-      {showIcon && (
-        <Ionicons
-          name={getIconName()}
-          size={16}
-          color={getTextColor()}
-          style={styles.icon}
-        />
+      <View style={styles.messageContainer}>
+        {showIcon && (
+          <Ionicons
+            name={getIconName()}
+            size={16}
+            color={getTextColor()}
+            style={styles.icon}
+          />
+        )}
+        <Text style={[styles.message, { color: getTextColor() }]}>
+          {message}
+        </Text>
+      </View>
+      {onRetry && showRetry && (
+        <Pressable 
+          style={styles.retryButton} 
+          onPress={onRetry}
+          testID={`${testID}-retry`}
+        >
+          <Ionicons name="refresh" size={16} color={colors.primary} />
+          <Text style={styles.retryText}>Retry</Text>
+        </Pressable>
       )}
-      <Text style={[styles.message, { color: getTextColor() }]}>
-        {message}
-      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     marginVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
+  },
+  messageContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: spacing.sm,
   },
   icon: {
     marginRight: spacing.xs,
@@ -80,5 +99,21 @@ const styles = StyleSheet.create({
     flex: 1,
     ...typography.bodySmall,
     lineHeight: 20,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  retryText: {
+    ...typography.button,
+    color: colors.primary,
+    marginLeft: spacing.xs,
   },
 });

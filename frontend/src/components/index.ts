@@ -10,3 +10,7 @@ export { SearchBar } from './SearchBar';
 export { CategoryFilter } from './CategoryFilter';
 export { EmptyState } from './EmptyState';
 export { FloatingActionButton } from './FloatingActionButton';
+export { RecipeDetailHeader } from './RecipeDetailHeader';
+export { IngredientsList } from './IngredientsList';
+export { CookingSteps } from './CookingSteps';
+export { RecipeActions } from './RecipeActions';
