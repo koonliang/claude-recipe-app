@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AWSProjectType>Lambda</AWSProjectType>
@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\BuildingBlocks\Common\BuildingBlocks.Common.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Observability\BuildingBlocks.Observability.csproj" />
+    <ProjectReference Include="..\..\Core\Application\Core.Application.csproj" />
   </ItemGroup>
 
 </Project>

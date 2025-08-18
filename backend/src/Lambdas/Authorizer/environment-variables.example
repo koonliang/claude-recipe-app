@@ -1,0 +1,36 @@
+# Environment Variables for Authorizer Lambda
+
+# Database Configuration (for future use)
+DATABASE__CONNECTIONSTRING="Server=prod-db;Database=RecipeApp_Prod;User=app_user;Password=prod_password;"
+DATABASE__COMMANDTIMEOUT="60"
+DATABASE__ENABLERETRYONFAILURE="true"
+DATABASE__MAXRETRYCOUNT="5"
+
+# JWT Configuration (primary for token validation)
+JWT__SECRETKEY="production-super-secret-key-that-must-be-at-least-32-characters-long"
+JWT__ISSUER="RecipeApp-Production"
+JWT__AUDIENCE="RecipeApp-API-Production"
+JWT__EXPIRATIONMINUTES="30"
+JWT__REFRESHTOKENEXPIRATIONMINUTES="7200"
+
+# API Gateway Configuration
+APIGATEWAY__BASEURL="https://api.production.recipeapp.com"
+APIGATEWAY__APIVERSION="v1"
+APIGATEWAY__ENABLECORS="true"
+APIGATEWAY__ALLOWEDORIGINS__0="https://recipeapp.com"
+APIGATEWAY__ALLOWEDORIGINS__1="https://www.recipeapp.com"
+APIGATEWAY__TIMEOUTSECONDS="30"
+
+# Logging Configuration
+LOGGING__LOGLEVEL__DEFAULT="Warning"
+LOGGING__LOGLEVEL__MICROSOFT="Error"
+LOGGING__LOGLEVEL__SYSTEM="Error"
+LOGGING__LOGLEVEL__ASPNETCORE="Error"
+
+# Serilog Configuration
+SERILOG__MINIMUMLEVEL__DEFAULT="Warning"
+SERILOG__MINIMUMLEVEL__OVERRIDE__MICROSOFT="Error"
+SERILOG__MINIMUMLEVEL__OVERRIDE__SYSTEM="Error"
+
+# Environment (affects which appsettings file is loaded)
+ASPNETCORE_ENVIRONMENT="Production"

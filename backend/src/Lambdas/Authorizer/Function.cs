@@ -3,6 +3,7 @@ using Amazon.Lambda.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Core.Application.Configuration;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -17,8 +18,20 @@ public class Function
     {
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
             .AddEnvironmentVariables()
             .Build();
+
+        // Validate configuration on startup
+        try
+        {
+            configuration.ValidateConfigurationOnStartup();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Configuration validation failed: {ex.Message}");
+            throw;
+        }
 
         var services = new ServiceCollection();
         ConfigureServices(services, configuration);
@@ -31,6 +44,10 @@ public class Function
     {
         services.AddSingleton(configuration);
         services.AddLogging(builder => builder.AddConsole());
+        
+        // Add configuration options with validation
+        services.AddConfigurationOptions(configuration);
+        
         services.AddScoped<ITokenValidator, TokenValidator>();
     }
 

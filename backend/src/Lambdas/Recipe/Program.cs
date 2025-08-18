@@ -1,14 +1,32 @@
 using Amazon.Lambda.AspNetCoreServer;
 using BuildingBlocks.Observability;
 using Infrastructure.Persistence;
+using Core.Application.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add environment variables to configuration
+builder.Configuration.AddEnvironmentVariables();
+
+// Validate configuration on startup
+try
+{
+    builder.Configuration.ValidateConfigurationOnStartup();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Configuration validation failed: {ex.Message}");
+    throw;
+}
 
 builder.Host.UseSerilogLogging();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add configuration options with validation
+builder.Services.AddConfigurationOptions(builder.Configuration);
 
 builder.Services.AddDatabase(builder.Configuration);
 
