@@ -15,10 +15,9 @@ import { ConfirmationDialog } from '@/src/components/ConfirmationDialog';
 import { ErrorMessage } from '@/src/components/ErrorMessage';
 import { useRecipeDetail, useConfirmDialog } from '@/src/hooks';
 import { colors, spacing } from '@/src/utils/theme';
-import { isDemoMode } from '@/src/services/apiService';
 
 export default function RecipeDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { recipeId } = useLocalSearchParams<{ recipeId: string }>();
 
   const {
     recipe,
@@ -28,7 +27,7 @@ export default function RecipeDetailScreen() {
     deleteRecipe,
     toggleFavorite,
     isDeleting,
-  } = useRecipeDetail({ recipeId: id || '' });
+  } = useRecipeDetail({ recipeId: recipeId || '' });
 
   const handleDeleteConfirm = async () => {
     const success = await deleteRecipe();
@@ -53,12 +52,22 @@ export default function RecipeDetailScreen() {
     cancelText: 'Cancel',
   });
 
-  if (!id) {
+  if (!recipeId) {
     Alert.alert('Error', 'Recipe ID is required', [
       { text: 'Go Back', onPress: () => router.back() }
     ]);
     return null;
   }
+
+  const handleEdit = () => {
+    router.push({
+      pathname: '/recipe-form',
+      params: { 
+        mode: 'edit',
+        recipeId: recipeId 
+      }
+    });
+  };
 
   const handleShare = () => {
     // TODO: Implement recipe sharing functionality
@@ -113,14 +122,13 @@ export default function RecipeDetailScreen() {
           testID="cooking-steps"
         />
         
-        {!isDemoMode() && (
-          <RecipeActions 
-            onDelete={showDeleteDialog}
-            onShare={handleShare}
-            isDeleting={isDeleting}
-            testID="recipe-actions"
-          />
-        )}
+        <RecipeActions 
+          onEdit={handleEdit}
+          onDelete={showDeleteDialog}
+          onShare={handleShare}
+          isDeleting={isDeleting}
+          testID="recipe-actions"
+        />
       </ScrollView>
       
       <ConfirmationDialog {...deleteDialogProps} />

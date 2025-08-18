@@ -5,3 +5,4 @@ export { ForgotPasswordScreen } from './ForgotPasswordScreen';
 export { ResetPasswordScreen } from './ResetPasswordScreen';
 export { RecipeListScreen } from './RecipeListScreen';
 export { RecipeDetailScreen } from './RecipeDetailScreen';
+export { RecipeFormScreen } from './RecipeFormScreen';

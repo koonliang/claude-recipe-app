@@ -36,7 +36,10 @@ export default function RecipeListScreen() {
   });
 
   const handleRecipePress = useCallback((recipe: Recipe) => {
-    router.push(`/recipe/${recipe.id}` as any);
+    router.push({
+      pathname: '/recipe-detail',
+      params: { recipeId: recipe.id }
+    });
   }, []);
 
   const handleClearSearch = () => {

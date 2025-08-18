@@ -176,9 +176,9 @@ export const mockApiService = {
     title: string;
     description: string;
     category: string;
-    photo_url: string;
-    ingredients: Omit<Ingredient, 'id'>[];
-    steps: Omit<RecipeStep, 'id'>[];
+    photo_url?: string;
+    ingredients: { id?: string; name: string; quantity: string; unit: string }[];
+    steps: { id?: string; instruction_text: string; step_number: number }[];
   }): Promise<Recipe> {
     await delay();
     
@@ -196,6 +196,7 @@ export const mockApiService = {
     
     return mockStorage.createRecipe({
       ...recipeData,
+      photo_url: recipeData.photo_url || '',
       ingredients,
       steps,
       is_favorite: false,

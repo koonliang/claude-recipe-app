@@ -83,9 +83,9 @@ export const apiService = {
     title: string;
     description: string;
     category: string;
-    photo_url: string;
-    ingredients: { name: string; quantity: string; unit: string }[];
-    steps: { instruction_text: string; step_number: number }[];
+    photo_url?: string;
+    ingredients: { id?: string; name: string; quantity: string; unit: string }[];
+    steps: { id?: string; instruction_text: string; step_number: number }[];
   }): Promise<Recipe> {
     if (isAnonymousModeEnabled()) {
       return mockApiService.createRecipe(recipeData);

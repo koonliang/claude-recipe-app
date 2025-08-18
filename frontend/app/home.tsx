@@ -5,17 +5,21 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/contexts';
 import { LogoutButton, FloatingActionButton } from '@/src/components';
 import { RecipeListScreen } from '@/src/screens';
 import { colors, typography, spacing } from '@/src/utils/theme';
 
 export default function AuthenticatedHomeScreen() {
+  const router = useRouter();
   const { user, isLoading, isAnonymous } = useAuth();
 
   const handleAddRecipe = () => {
-    // TODO: Navigate to recipe creation screen when implemented
-    console.log('Navigate to add recipe');
+    router.push({
+      pathname: '/recipe-form',
+      params: { mode: 'create' }
+    });
   };
 
   if (isLoading) {

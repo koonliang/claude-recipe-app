@@ -5,6 +5,7 @@ import { Button } from '@/src/components/Button';
 import { colors, spacing } from '@/src/utils/theme';
 
 export interface RecipeActionsProps {
+  onEdit?: () => void;
   onDelete: () => void;
   onShare?: () => void;
   isDeleting?: boolean;
@@ -12,6 +13,7 @@ export interface RecipeActionsProps {
 }
 
 export const RecipeActions = memo(({ 
+  onEdit,
   onDelete, 
   onShare,
   isDeleting = false,
@@ -19,6 +21,18 @@ export const RecipeActions = memo(({
 }: RecipeActionsProps) => {
   return (
     <View style={styles.container} testID={testID}>
+      {onEdit && (
+        <Button
+          variant="primary"
+          onPress={onEdit}
+          style={styles.editButton}
+          testID={`${testID}-edit`}
+        >
+          <Ionicons name="create-outline" size={18} color={colors.white} />
+          Edit Recipe
+        </Button>
+      )}
+      
       <Button
         variant="danger"
         onPress={onDelete}
@@ -53,6 +67,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
     backgroundColor: colors.background,
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   deleteButton: {
     flexDirection: 'row',
