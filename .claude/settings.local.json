@@ -15,7 +15,9 @@
       "Bash(dotnet --version)",
       "Bash(dotnet test)",
       "Bash(find:*)",
-      "Bash(dotnet run:*)"
+      "Bash(dotnet run:*)",
+      "Bash(touch:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

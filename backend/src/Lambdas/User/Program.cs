@@ -2,6 +2,10 @@ using Amazon.Lambda.AspNetCoreServer;
 using BuildingBlocks.Observability;
 using Infrastructure.Persistence;
 using Core.Application.Configuration;
+using DotNetEnv;
+
+// Load .env file for local development
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 

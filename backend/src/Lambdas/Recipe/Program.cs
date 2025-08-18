@@ -2,6 +2,10 @@ using Amazon.Lambda.AspNetCoreServer;
 using BuildingBlocks.Observability;
 using Infrastructure.Persistence;
 using Core.Application.Configuration;
+using DotNetEnv;
+
+// Load .env file for local development
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +42,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    Console.WriteLine("Dev mode swagger");
     app.UseSwagger();
     app.UseSwaggerUI();
 }
