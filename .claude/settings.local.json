@@ -9,7 +9,10 @@
       "Bash(npx expo install:*)",
       "Bash(npm ls:*)",
       "Bash(npm install:*)",
-      "Bash(dotnet new:*)"
+      "Bash(dotnet new:*)",
+      "Bash(dotnet build:*)",
+      "Bash(export PATH=\"$HOME/.dotnet:$PATH\")",
+      "Bash(dotnet --version)"
     ],
     "deny": []
   }

@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "Environment": "prod",
+    "DatabaseConnectionString": "Server=prod-mysql.amazonaws.com;Database=RecipeAppProd;User=produser;Password=prodpassword;"
+  }
+}
