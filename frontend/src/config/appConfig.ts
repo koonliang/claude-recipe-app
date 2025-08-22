@@ -15,8 +15,8 @@ const getConfig = (): AppConfig => {
     // Anonymous mode can be enabled via environment variable
     anonymousMode: extra.anonymousMode === true || process.env.EXPO_PUBLIC_ANONYMOUS_MODE === 'true',
     
-    // API configuration
-    apiBaseUrl: extra.apiBaseUrl || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000/api',
+    // API configuration - for Lambda deployment, base URL should be the API Gateway URL without path
+    apiBaseUrl: extra.apiBaseUrl || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000',
     
     // App metadata
     appName: Constants.expoConfig?.name || 'MyRecipeBox',

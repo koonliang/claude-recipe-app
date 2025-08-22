@@ -62,6 +62,11 @@ export class ApiClient {
       const timeoutId = setTimeout(() => controller.abort(), this.defaultTimeout);
       requestOptions.signal = controller.signal;
 
+      // Log request in development mode
+      if (__DEV__) {
+        console.log(`API Request: ${method} ${url}`, { body });
+      }
+
       const response = await fetch(url, requestOptions);
       clearTimeout(timeoutId);
 
@@ -72,10 +77,20 @@ export class ApiClient {
 
       // Handle empty responses (like DELETE)
       if (response.status === 204 || response.headers.get('content-length') === '0') {
+        if (__DEV__) {
+          console.log(`API Response: ${response.status} - Empty response`);
+        }
         return {} as T;
       }
 
-      return await response.json();
+      const responseData = await response.json();
+      
+      // Log response in development mode
+      if (__DEV__) {
+        console.log(`API Response: ${response.status}`, responseData);
+      }
+
+      return responseData;
     } catch (error) {
       if (error instanceof Error) {
         if (error.name === 'AbortError') {

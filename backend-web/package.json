@@ -1,0 +1,31 @@
+{
+  "name": "recipe-app-local-gateway",
+  "version": "1.0.0",
+  "description": "Local development gateway for Recipe App - routes requests between frontend and Lambda services",
+  "main": "local-gateway.js",
+  "scripts": {
+    "start": "node local-gateway.js",
+    "dev": "nodemon local-gateway.js",
+    "test": "curl http://localhost:3000/health"
+  },
+  "keywords": [
+    "gateway",
+    "proxy",
+    "development",
+    "lambda",
+    "recipe-app"
+  ],
+  "author": "Recipe App Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

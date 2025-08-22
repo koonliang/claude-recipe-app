@@ -1,6 +1,7 @@
 import { isAnonymousModeEnabled } from '@/src/config/appConfig';
 import { mockApiService } from './mockApi';
 import { authService } from './auth';
+import { recipeService } from './recipeService';
 
 // Import the recipe types we need
 import type { Recipe } from '@/src/data/mockData';
@@ -79,9 +80,7 @@ export const apiService = {
       return mockApiService.getRecipes(params);
     }
     
-    // TODO: Implement real recipe API calls when backend is ready
-    // For now, use mock data even in non-anonymous mode for development
-    return mockApiService.getRecipes(params);
+    return recipeService.getRecipes(params);
   },
 
   async getRecipe(id: string): Promise<Recipe> {
@@ -89,8 +88,7 @@ export const apiService = {
       return mockApiService.getRecipe(id);
     }
     
-    // TODO: Implement real recipe API call
-    return mockApiService.getRecipe(id);
+    return recipeService.getRecipe(id);
   },
 
   async createRecipe(recipeData: {
@@ -105,17 +103,22 @@ export const apiService = {
       return mockApiService.createRecipe(recipeData);
     }
     
-    // TODO: Implement real recipe creation API call
-    return mockApiService.createRecipe(recipeData);
+    return recipeService.createRecipe(recipeData);
   },
 
-  async updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe> {
+  async updateRecipe(id: string, updates: {
+    title: string;
+    description: string;
+    category: string;
+    photo_url?: string;
+    ingredients: { id?: string; name: string; quantity: string; unit: string }[];
+    steps: { id?: string; instruction_text: string; step_number: number }[];
+  }): Promise<Recipe> {
     if (isAnonymousModeEnabled()) {
-      return mockApiService.updateRecipe(id, updates);
+      return mockApiService.updateRecipe(id, updates as Partial<Recipe>);
     }
     
-    // TODO: Implement real recipe update API call
-    return mockApiService.updateRecipe(id, updates);
+    return recipeService.updateRecipe(id, updates);
   },
 
   async deleteRecipe(id: string): Promise<void> {
@@ -123,8 +126,7 @@ export const apiService = {
       return mockApiService.deleteRecipe(id);
     }
     
-    // TODO: Implement real recipe deletion API call
-    return mockApiService.deleteRecipe(id);
+    return recipeService.deleteRecipe(id);
   },
 
   async toggleFavorite(id: string): Promise<{ is_favorite: boolean }> {
@@ -132,8 +134,11 @@ export const apiService = {
       return mockApiService.toggleFavorite(id);
     }
     
-    // TODO: Implement real favorite toggle API call
-    return mockApiService.toggleFavorite(id);
+    // First get the current recipe to check favorite status
+    const currentRecipe = await recipeService.getRecipe(id);
+    const newFavoriteStatus = !currentRecipe.is_favorite;
+    
+    return recipeService.toggleFavorite(id, newFavoriteStatus);
   },
 
   async getFavorites(): Promise<Recipe[]> {
@@ -141,8 +146,7 @@ export const apiService = {
       return mockApiService.getFavorites();
     }
     
-    // TODO: Implement real favorites API call
-    return mockApiService.getFavorites();
+    return recipeService.getFavorites();
   },
 };
 
