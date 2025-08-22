@@ -17,7 +17,8 @@ import * as yup from 'yup';
 import { Button, TextInput, ErrorMessage } from '@/src/components';
 import { colors, typography, spacing } from '@/src/utils/theme';
 import { useAuth } from '@/src/contexts';
-import { LoginCredentials, AuthError } from '@/src/types';
+import { LoginCredentials } from '@/src/types';
+import { ApiError } from '@/src/services/apiClient';
 
 const loginSchema = yup.object({
   email: yup
@@ -59,8 +60,8 @@ export default function LoginScreen() {
       console.error('Login error:', error);
       
       if (error && typeof error === 'object' && 'message' in error) {
-        const authError = error as AuthError;
-        setAuthError(authError.message);
+        const apiError = error as ApiError;
+        setAuthError(apiError.message);
       } else {
         setAuthError('An unexpected error occurred. Please try again.');
       }

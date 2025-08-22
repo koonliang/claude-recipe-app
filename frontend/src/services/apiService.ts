@@ -59,6 +59,20 @@ export const apiService = {
     return authService.getStoredUser();
   },
 
+  async validateToken(): Promise<boolean> {
+    if (isAnonymousModeEnabled()) {
+      return true; // Anonymous mode doesn't use tokens
+    }
+    return authService.validateToken();
+  },
+
+  async getProfile(): Promise<any> {
+    if (isAnonymousModeEnabled()) {
+      return null; // No profile in anonymous mode
+    }
+    return authService.getProfile();
+  },
+
   // Recipe operations
   async getRecipes(params?: { category?: string; search?: string }): Promise<Recipe[]> {
     if (isAnonymousModeEnabled()) {

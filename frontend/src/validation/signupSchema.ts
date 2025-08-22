@@ -2,7 +2,7 @@ import * as yup from 'yup';
 import { isPasswordValid } from '@/src/utils/passwordValidation';
 
 export const signupSchema = yup.object().shape({
-  full_name: yup
+  name: yup
     .string()
     .required('Full name is required')
     .min(2, 'Full name must be at least 2 characters')

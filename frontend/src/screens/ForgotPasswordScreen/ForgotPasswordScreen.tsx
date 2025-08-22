@@ -14,14 +14,15 @@ import { useRouter } from 'expo-router';
 
 import { Button, TextInput, ErrorMessage, SuccessMessage } from '@/src/components';
 import { theme } from '@/src/utils/theme';
-import { authService } from '@/src/services/auth';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/src/validation/forgotPasswordSchema';
-import type { AuthError } from '@/src/types';
+import type { ApiError } from '@/src/services/apiClient';
 
 export const ForgotPasswordScreen: React.FC = () => {
   const router = useRouter();
+  const { forgotPassword } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState<AuthError | null>(null);
+  const [apiError, setApiError] = useState<ApiError | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const {
@@ -43,13 +44,14 @@ export const ForgotPasswordScreen: React.FC = () => {
     setApiError(null);
 
     try {
-      await authService.forgotPassword(data.email);
+      await forgotPassword(data.email);
       setIsSuccess(true);
     } catch (error) {
       if (error && typeof error === 'object' && 'message' in error) {
-        setApiError(error as AuthError);
+        setApiError(error as ApiError);
       } else {
         setApiError({
+          status: 0,
           message: 'Unable to send reset email. Please try again.',
         });
       }

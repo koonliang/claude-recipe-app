@@ -51,22 +51,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
       ]);
 
       if (token && user) {
-        setAuthState({
-          user: user as User,
-          token,
-          isAuthenticated: true,
-          isLoading: false,
-          isAnonymous: false,
-        });
-      } else {
-        setAuthState({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-          isLoading: false,
-          isAnonymous: false,
-        });
+        // Validate token with backend
+        try {
+          const isValid = await apiService.validateToken?.() ?? true;
+          if (isValid) {
+            setAuthState({
+              user: user as User,
+              token,
+              isAuthenticated: true,
+              isLoading: false,
+              isAnonymous: false,
+            });
+            return;
+          }
+        } catch {
+          // Token validation failed, clear stored data
+          await apiService.logout();
+        }
       }
+      
+      // No valid token or user
+      setAuthState({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: false,
+        isAnonymous: false,
+      });
     } catch (error) {
       console.error('Error checking auth state:', error);
       setAuthState({

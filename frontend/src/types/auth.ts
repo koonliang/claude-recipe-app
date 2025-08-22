@@ -1,7 +1,9 @@
 export interface User {
   id: string;
-  full_name: string;
+  fullName: string;
   email: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface AuthResponse {
@@ -20,7 +22,7 @@ export interface LoginCredentials {
 }
 
 export interface SignupData {
-  full_name: string;
+  name: string;
   email: string;
   password: string;
 }

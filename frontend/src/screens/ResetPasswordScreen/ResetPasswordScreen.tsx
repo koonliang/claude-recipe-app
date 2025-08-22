@@ -20,17 +20,18 @@ import {
   PasswordStrengthIndicator 
 } from '@/src/components';
 import { theme } from '@/src/utils/theme';
-import { authService } from '@/src/services/auth';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { resetPasswordSchema, type ResetPasswordFormData } from '@/src/validation/resetPasswordSchema';
 import { calculatePasswordStrength } from '@/src/utils/passwordValidation';
 import { isValidJWTFormat, isJWTExpired } from '@/src/utils/tokenValidation';
-import type { AuthError } from '@/src/types';
+import type { ApiError } from '@/src/services/apiClient';
 
 export const ResetPasswordScreen: React.FC = () => {
   const router = useRouter();
+  const { resetPassword } = useAuth();
   const { token: routeToken } = useLocalSearchParams<{ token?: string }>();
   const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState<AuthError | null>(null);
+  const [apiError, setApiError] = useState<ApiError | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -76,21 +77,22 @@ export const ResetPasswordScreen: React.FC = () => {
     setApiError(null);
 
     try {
-      await authService.resetPassword(token, data.newPassword);
+      await resetPassword(token, data.newPassword);
       setIsSuccess(true);
     } catch (error) {
       if (error && typeof error === 'object' && 'message' in error) {
-        const authError = error as AuthError;
+        const apiError = error as ApiError;
         
         // Handle specific error cases
-        if (authError.message.toLowerCase().includes('token') || 
-            authError.message.toLowerCase().includes('expired')) {
+        if (apiError.message.toLowerCase().includes('token') || 
+            apiError.message.toLowerCase().includes('expired')) {
           setTokenError('This reset link has expired or is invalid. Please request a new password reset.');
         } else {
-          setApiError(authError);
+          setApiError(apiError);
         }
       } else {
         setApiError({
+          status: 0,
           message: 'Unable to reset password. Please try again.',
         });
       }

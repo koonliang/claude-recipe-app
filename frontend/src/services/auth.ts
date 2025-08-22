@@ -1,41 +1,12 @@
-import { AuthResponse, LoginCredentials, SignupData, AuthError } from '@/src/types';
+import { AuthResponse, LoginCredentials, SignupData, User } from '@/src/types';
 import { StorageService } from './storage';
+import { ApiClient, ApiError } from './apiClient';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
-
-class AuthService {
-  private async makeRequest<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const error: AuthError = {
-        message: errorData.message || 'An error occurred',
-        field: errorData.field,
-      };
-      throw error;
-    }
-
-    return response.json();
-  }
+class AuthService extends ApiClient {
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await this.makeRequest<AuthResponse>('/auth/signin', {
-        method: 'POST',
-        body: JSON.stringify(credentials),
-      });
+      const response = await this.post<AuthResponse>('/auth/login', credentials);
 
       // Store token and user data
       await StorageService.setToken(response.token);
@@ -43,7 +14,8 @@ class AuthService {
 
       return response;
     } catch (error) {
-      if (error instanceof Error) {
+      // Re-throw ApiError as is, convert others to generic error
+      if (this.isApiError(error)) {
         throw error;
       }
       throw new Error('Login failed');
@@ -52,10 +24,7 @@ class AuthService {
 
   async signup(userData: SignupData): Promise<AuthResponse> {
     try {
-      const response = await this.makeRequest<AuthResponse>('/auth/signup', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      });
+      const response = await this.post<AuthResponse>('/auth/signup', userData);
 
       // Store token and user data
       await StorageService.setToken(response.token);
@@ -63,7 +32,8 @@ class AuthService {
 
       return response;
     } catch (error) {
-      if (error instanceof Error) {
+      // Re-throw ApiError as is, convert others to generic error
+      if (this.isApiError(error)) {
         throw error;
       }
       throw new Error('Signup failed');
@@ -81,12 +51,10 @@ class AuthService {
 
   async forgotPassword(email: string): Promise<void> {
     try {
-      await this.makeRequest('/auth/forgot-password', {
-        method: 'POST',
-        body: JSON.stringify({ email }),
-      });
+      await this.post('/auth/forgot-password', { email });
     } catch (error) {
-      if (error instanceof Error) {
+      // Re-throw ApiError as is, convert others to generic error
+      if (this.isApiError(error)) {
         throw error;
       }
       throw new Error('Password reset request failed');
@@ -95,12 +63,10 @@ class AuthService {
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
     try {
-      await this.makeRequest('/auth/reset-password', {
-        method: 'POST',
-        body: JSON.stringify({ token, newPassword }),
-      });
+      await this.post('/auth/reset-password', { token, newPassword });
     } catch (error) {
-      if (error instanceof Error) {
+      // Re-throw ApiError as is, convert others to generic error
+      if (this.isApiError(error)) {
         throw error;
       }
       throw new Error('Password reset failed');
@@ -111,8 +77,33 @@ class AuthService {
     return StorageService.getToken();
   }
 
-  async getStoredUser(): Promise<object | null> {
-    return StorageService.getUser();
+  async getStoredUser(): Promise<User | null> {
+    return StorageService.getUser() as Promise<User | null>;
+  }
+
+  async getProfile(): Promise<User> {
+    try {
+      return await this.get<User>('/auth/profile', true);
+    } catch (error) {
+      // Re-throw ApiError as is, convert others to generic error
+      if (this.isApiError(error)) {
+        throw error;
+      }
+      throw new Error('Failed to get user profile');
+    }
+  }
+
+  async validateToken(): Promise<boolean> {
+    try {
+      await this.getProfile();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private isApiError(error: any): error is ApiError {
+    return error && typeof error.status === 'number' && typeof error.message === 'string';
   }
 }
 

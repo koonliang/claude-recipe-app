@@ -3,8 +3,9 @@ import { User } from '@/src/types/auth';
 // Mock user for anonymous mode
 export const mockAnonymousUser: User = {
   id: 'anonymous-user-001',
-  full_name: 'Demo User',
+  fullName: 'Demo User',
   email: 'demo@example.com',
+  createdAt: new Date().toISOString(),
 };
 
 // Recipe types based on API contract in requirements.md

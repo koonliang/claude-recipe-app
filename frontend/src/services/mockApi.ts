@@ -124,7 +124,7 @@ export const mockApiService = {
       token: 'mock-jwt-token',
       user: {
         ...mockAnonymousUser,
-        full_name: userData.full_name,
+        fullName: userData.name,
         email: userData.email,
       },
     };

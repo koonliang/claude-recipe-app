@@ -43,7 +43,7 @@ export default function AuthenticatedHomeScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>MyRecipeBox</Text>
         <Text style={styles.subtitle}>
-          Welcome{isAnonymous ? ' to the demo' : ' back'}, {user?.full_name}!
+          Welcome{isAnonymous ? ' to the demo' : ' back'}, {user?.fullName}!
         </Text>
         <LogoutButton
           title="Sign Out"

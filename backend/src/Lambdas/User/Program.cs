@@ -32,6 +32,34 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add CORS configuration for frontend integration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:8081",      // Expo Dev Server
+                "exp://localhost:8081",       // Expo tunneling
+                "http://127.0.0.1:8081",     // Alternative localhost
+                "http://192.168.1.100:8081", // Common local network IP (adjust as needed)
+                "exp://192.168.1.100:8081"   // Expo on local network
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+    
+    // Allow all origins for development (less secure but easier for development)
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 // Add configuration options with validation
 builder.Services.AddConfigurationOptions(builder.Configuration);
 
@@ -77,6 +105,14 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    
+    // Use permissive CORS in development for easier frontend integration
+    app.UseCors("AllowAll");
+}
+else
+{
+    // Use more restrictive CORS in production
+    app.UseCors("AllowFrontend");
 }
 
 app.UseHttpsRedirection();

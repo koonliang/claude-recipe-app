@@ -20,14 +20,14 @@ import {
   PasswordStrengthIndicator 
 } from '@/src/components';
 import { colors, typography, spacing } from '@/src/utils/theme';
-import { authService } from '@/src/services/auth';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { validatePasswordStrength } from '@/src/utils/passwordValidation';
 import { signupSchema, SignupFormData } from '@/src/validation/signupSchema';
-import { AuthError } from '@/src/types';
+import { ApiError } from '@/src/services/apiClient';
 
 export default function SignupScreen() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { signup, isLoading } = useAuth();
   const [apiError, setApiError] = useState<string | null>(null);
 
   const {
@@ -39,7 +39,7 @@ export default function SignupScreen() {
     resolver: yupResolver(signupSchema),
     mode: 'onChange',
     defaultValues: {
-      full_name: '',
+      name: '',
       email: '',
       password: '',
     },
@@ -51,12 +51,11 @@ export default function SignupScreen() {
   const onSubmit = async (data: SignupFormData) => {
     if (isLoading) return;
 
-    setIsLoading(true);
     setApiError(null);
 
     try {
-      await authService.signup({
-        full_name: data.full_name,
+      await signup({
+        name: data.name,
         email: data.email,
         password: data.password,
       });
@@ -66,14 +65,13 @@ export default function SignupScreen() {
     } catch (error) {
       console.error('Signup error:', error);
       
-      if (error instanceof Error) {
-        const authError = error as AuthError;
-        setApiError(authError.message || 'Signup failed. Please try again.');
+      // Handle API errors with specific messages
+      if (error && typeof error === 'object' && 'message' in error) {
+        const apiError = error as ApiError;
+        setApiError(apiError.message || 'Signup failed. Please try again.');
       } else {
         setApiError('An unexpected error occurred. Please try again.');
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -109,14 +107,14 @@ export default function SignupScreen() {
 
             <Controller
               control={control}
-              name="full_name"
+              name="name"
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   label="Full Name"
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={errors.full_name?.message}
+                  error={errors.name?.message}
                   placeholder="Enter your full name"
                   autoCapitalize="words"
                   autoComplete="name"

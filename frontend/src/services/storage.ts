@@ -1,12 +1,21 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
 
+// Use SecureStore for tokens on native platforms, AsyncStorage on web
+const isWeb = Platform.OS === 'web';
+
 export const StorageService = {
   async setToken(token: string): Promise<void> {
     try {
-      await AsyncStorage.setItem(TOKEN_KEY, token);
+      if (isWeb) {
+        await AsyncStorage.setItem(TOKEN_KEY, token);
+      } else {
+        await SecureStore.setItemAsync(TOKEN_KEY, token);
+      }
     } catch (error) {
       console.error('Error storing token:', error);
       throw new Error('Failed to store authentication token');
@@ -15,7 +24,11 @@ export const StorageService = {
 
   async getToken(): Promise<string | null> {
     try {
-      return await AsyncStorage.getItem(TOKEN_KEY);
+      if (isWeb) {
+        return await AsyncStorage.getItem(TOKEN_KEY);
+      } else {
+        return await SecureStore.getItemAsync(TOKEN_KEY);
+      }
     } catch (error) {
       console.error('Error retrieving token:', error);
       return null;
@@ -24,7 +37,11 @@ export const StorageService = {
 
   async removeToken(): Promise<void> {
     try {
-      await AsyncStorage.removeItem(TOKEN_KEY);
+      if (isWeb) {
+        await AsyncStorage.removeItem(TOKEN_KEY);
+      } else {
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
+      }
     } catch (error) {
       console.error('Error removing token:', error);
       throw new Error('Failed to remove authentication token');
