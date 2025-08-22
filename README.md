@@ -2,6 +2,8 @@
 
 A full-stack mobile recipe management application built with React Native and .NET, featuring clean architecture, serverless backend, and seamless local development experience.
 
+This project is implemented from scratch using Claude Code, no other project reference is used.
+
 ## 🎯 Overview
 
 **MyRecipeBox** is a personal recipe management mobile app that allows users to create, organize, and discover recipes. The app features a modern dark theme with orange accents and provides both authenticated and anonymous demo modes for easy exploration.
@@ -62,7 +64,7 @@ The project follows **Clean Architecture** principles with clear separation betw
 - **React Context** - State management for authentication
 
 ### **Backend (Serverless API)**
-- **.NET 8** with **ASP.NET Core** - Modern web API framework
+- **.NET 9** with **ASP.NET Core** - Modern web API framework
 - **AWS Lambda** - Serverless compute (User, Recipe, Authorizer functions)
 - **Entity Framework Core** - ORM with MySQL provider
 - **MediatR** - CQRS pattern implementation
@@ -125,7 +127,7 @@ claude-recipe-app/
 ### Prerequisites
 
 - **Node.js** 18+ and npm
-- **.NET 8 SDK**
+- **.NET 9 SDK**
 - **Expo CLI**: `npm install -g @expo/cli`
 - **MySQL** (local or cloud instance)
 
