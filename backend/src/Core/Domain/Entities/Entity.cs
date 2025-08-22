@@ -6,6 +6,11 @@ public abstract class Entity
     public DateTime CreatedAt { get; protected set; }
     public DateTime? UpdatedAt { get; protected set; }
 
+    protected void SetUpdatedAt()
+    {
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     protected Entity()
     {
         Id = Guid.NewGuid();

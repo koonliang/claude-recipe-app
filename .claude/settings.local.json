@@ -17,7 +17,14 @@
       "Bash(find:*)",
       "Bash(dotnet run:*)",
       "Bash(touch:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(pgrep:*)",
+      "Bash(ps:*)",
+      "Bash(lsof:*)",
+      "Bash(fuser:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet restore:*)"
     ],
     "deny": []
   }

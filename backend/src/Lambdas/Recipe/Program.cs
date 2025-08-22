@@ -3,6 +3,9 @@ using BuildingBlocks.Observability;
 using Infrastructure.Persistence;
 using Core.Application.Configuration;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 // Load .env file for local development
 Env.Load();
@@ -32,9 +35,39 @@ builder.Services.AddSwaggerGen();
 // Add configuration options with validation
 builder.Services.AddConfigurationOptions(builder.Configuration);
 
+// Add database
 builder.Services.AddDatabase(builder.Configuration);
 
-builder.Services.AddScoped<IRecipeService, RecipeService>();
+// Add infrastructure services
+builder.Services.AddInfrastructureServices();
+
+// Add MediatR
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(Core.Application.Commands.Recipe.CreateRecipeCommand).Assembly);
+});
+
+// Add JWT Authentication
+var jwtOptions = builder.Configuration.GetSection("Jwt").Get<Core.Application.Configuration.JwtOptions>();
+if (jwtOptions != null)
+{
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtOptions.SecretKey)),
+                ValidateIssuer = true,
+                ValidIssuer = jwtOptions.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtOptions.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+}
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 
@@ -48,35 +81,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/recipes", (IRecipeService recipeService) => 
-{
-    return Results.Ok(recipeService.GetRecipes());
-});
-
 app.Run();
-
-public interface IRecipeService
-{
-    IEnumerable<Recipe> GetRecipes();
-}
-
-public class RecipeService : IRecipeService
-{
-    public IEnumerable<Recipe> GetRecipes()
-    {
-        return new List<Recipe>
-        {
-            new Recipe { Id = Guid.NewGuid(), Name = "Sample Recipe", Description = "A sample recipe" }
-        };
-    }
-}
-
-public class Recipe
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-}
