@@ -24,7 +24,8 @@
       "Bash(lsof:*)",
       "Bash(fuser:*)",
       "Bash(dotnet clean:*)",
-      "Bash(dotnet restore:*)"
+      "Bash(dotnet restore:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

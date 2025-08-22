@@ -1,6 +1,9 @@
 using Core.Application.Commands.Auth;
+using Core.Application.Queries.User;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace User.Controllers;
 
@@ -61,6 +64,23 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = result.Error });
 
         return Ok(new { message = "Password reset successful" });
+    }
+
+    [HttpGet("profile")]
+    [Authorize]
+    public async Task<IActionResult> GetProfile()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized(new { error = "Invalid user identity" });
+
+        var query = new GetUserProfileQuery(userId);
+        var result = await _mediator.Send(query);
+
+        if (result.IsFailure)
+            return NotFound(new { error = result.Error });
+
+        return Ok(result.Value);
     }
 }
 

@@ -5,6 +5,7 @@ using Core.Application.DTOs;
 using Core.Application.Interfaces;
 using Core.Domain.Entities;
 using Core.Domain.ValueObjects;
+using UserEntity = Core.Domain.Entities.User;
 
 namespace Core.Application.Handlers.Auth;
 
@@ -43,7 +44,7 @@ public class SignupCommandHandler : ICommandHandler<SignupCommand, Authenticatio
         var passwordHash = _passwordService.HashPassword(request.Password);
 
         // Create user
-        var user = new User(request.Name.Trim(), emailResult.Value, passwordHash);
+        var user = new UserEntity(request.Name.Trim(), emailResult.Value, passwordHash);
 
         // Save user
         await _userRepository.AddAsync(user, cancellationToken);
