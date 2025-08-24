@@ -7,6 +7,7 @@ public interface IRecipeRepository
 {
     Task<Recipe?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<PagedResult<Recipe>> GetRecipesAsync(string? category, string? search, int page, int limit, Guid? userId = null, CancellationToken cancellationToken = default);
+    Task<int> GetTotalRecipeCountAsync(CancellationToken cancellationToken = default);
     Task AddAsync(Recipe recipe, CancellationToken cancellationToken = default);
     Task UpdateAsync(Recipe recipe, CancellationToken cancellationToken = default);
     Task DeleteAsync(Recipe recipe, CancellationToken cancellationToken = default);
