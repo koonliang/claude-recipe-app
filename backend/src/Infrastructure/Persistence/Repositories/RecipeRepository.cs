@@ -19,11 +19,32 @@ public class RecipeRepository : IRecipeRepository
 
     public async Task<Recipe?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Recipes
-            .Include(r => r.Ingredients)
-            .Include(r => r.Steps)
-            .Include(r => r.User)
-            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+        _logger.LogDebug("GetByIdAsync called - RecipeId: {RecipeId}", id);
+        
+        try
+        {
+            var recipe = await _context.Recipes
+                .Include(r => r.Ingredients)
+                .Include(r => r.Steps)
+                .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+
+            if (recipe != null)
+            {
+                _logger.LogInformation("Recipe retrieved successfully - RecipeId: {RecipeId}, Title: {Title}, IngredientsCount: {IngredientsCount}, StepsCount: {StepsCount}", 
+                    recipe.Id, recipe.Title, recipe.Ingredients.Count, recipe.Steps.Count);
+            }
+            else
+            {
+                _logger.LogWarning("Recipe not found in GetByIdAsync - RecipeId: {RecipeId}", id);
+            }
+
+            return recipe;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in GetByIdAsync - RecipeId: {RecipeId}", id);
+            throw;
+        }
     }
 
     public async Task<PagedResult<Recipe>> GetRecipesAsync(
@@ -109,6 +130,23 @@ public class RecipeRepository : IRecipeRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting total recipe count");
+            throw;
+        }
+    }
+
+    public async Task<bool> RecipeExistsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        _logger.LogDebug("Checking if recipe exists - RecipeId: {RecipeId}", id);
+        
+        try
+        {
+            var exists = await _context.Recipes.AnyAsync(r => r.Id == id, cancellationToken);
+            _logger.LogInformation("Recipe existence check - RecipeId: {RecipeId}, Exists: {Exists}", id, exists);
+            return exists;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking recipe existence - RecipeId: {RecipeId}", id);
             throw;
         }
     }
