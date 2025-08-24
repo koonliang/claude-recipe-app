@@ -25,7 +25,14 @@
       "Bash(fuser:*)",
       "Bash(dotnet clean:*)",
       "Bash(dotnet restore:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Read(//mnt/d/projects/screenshots/**)",
+      "Bash(ls -ltr /mnt/d/projects/screenshots | tail -1)",
+      "Bash(dotnet nuget locals:*)",
+      "Bash(/usr/bin/dotnet nuget locals:*)",
+      "Bash(/usr/bin/dotnet restore:*)",
+      "Bash(/usr/bin/dotnet build:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

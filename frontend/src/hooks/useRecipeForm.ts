@@ -48,7 +48,8 @@ export function useRecipeForm({
 
   const form = useForm<RecipeFormData>({
     resolver: yupResolver(recipeFormSchema),
-    mode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       title: '',
       description: '',
@@ -121,8 +122,16 @@ export function useRecipeForm({
 
   // Submit form
   const submitForm = useCallback(async () => {
+    console.log('submitForm called - triggering validation...');
     const isValid = await form.trigger();
-    if (!isValid) return;
+    console.log('submitForm validation result:', isValid);
+    console.log('submitForm errors:', form.formState.errors);
+    console.log('submitForm form data:', form.getValues());
+    
+    if (!isValid) {
+      console.log('submitForm - validation failed, returning early');
+      return;
+    }
 
     await handleSubmit(async (data) => {
       try {
@@ -160,6 +169,7 @@ export function useRecipeForm({
           hasUnsavedChanges: false,
         }));
 
+        console.log('Recipe saved successfully, calling onSuccess callback:', result);
         onSuccess?.(result);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to save recipe';

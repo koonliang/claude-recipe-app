@@ -101,6 +101,13 @@ builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 
 var app = builder.Build();
 
+// Ensure database is created for in-memory provider
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<RecipeAppDbContext>();
+    context.Database.EnsureCreated();
+}
+
 if (app.Environment.IsDevelopment())
 {
     Console.WriteLine("Dev mode swagger");

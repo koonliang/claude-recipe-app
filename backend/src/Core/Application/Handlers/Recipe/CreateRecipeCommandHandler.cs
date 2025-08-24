@@ -23,6 +23,7 @@ public class CreateRecipeCommandHandler : ICommandHandler<CreateRecipeCommand, R
 
     public async Task<Result<RecipeDto>> Handle(CreateRecipeCommand request, CancellationToken cancellationToken)
     {
+        Console.WriteLine("In Handle");
         // Validate required fields
         if (string.IsNullOrWhiteSpace(request.Title))
             return Result.Failure<RecipeDto>("Title is required");
@@ -66,9 +67,10 @@ public class CreateRecipeCommandHandler : ICommandHandler<CreateRecipeCommand, R
         {
             recipe.AddStep(stepDto.StepNumber, stepDto.InstructionText.Trim());
         }
-
+        Console.WriteLine("B4 saving recipe");
         // Save recipe
         await _recipeRepository.AddAsync(recipe, cancellationToken);
+        Console.WriteLine("After saving recipe");
 
         // Return DTO
         return Result.Success(recipe.ToDto());

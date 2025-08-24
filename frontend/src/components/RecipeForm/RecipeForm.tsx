@@ -50,6 +50,8 @@ export function RecipeForm({
 
   const { control, formState: { errors, isValid } } = form;
 
+  const { getValues, trigger } = form;
+
   const handleCancel = useCallback(() => {
     if (hasUnsavedChanges) {
       Alert.alert(
@@ -93,13 +95,30 @@ export function RecipeForm({
   }, [setImageUri]);
 
   const handleSubmit = useCallback(async () => {
+    console.log('Submit button pressed, isValid:', isValid, 'isSubmitting:', isSubmitting);
+    
+    // Manually trigger validation
+    const validationResult = await trigger();
+    console.log('Manual validation result:', validationResult);
+    console.log('Errors after manual validation:', form.formState.errors);
+    
+    if (!isValid && !validationResult) {
+      console.log('Form is invalid, current errors:', errors);
+      console.log('Current form data:', getValues());
+      return;
+    }
+    if (isSubmitting) {
+      console.log('Form is already submitting');
+      return;
+    }
     try {
+      console.log('Submitting form...');
       await submitForm();
     } catch (error) {
       // Error handling is done in the hook
       console.error('Form submission failed:', error);
     }
-  }, [submitForm]);
+  }, [submitForm, isValid, isSubmitting, errors, trigger, form.formState.errors, getValues]);
 
   if (isLoading) {
     return (
@@ -167,7 +186,7 @@ export function RecipeForm({
               title="Cancel"
               variant="outline"
               onPress={handleCancel}
-              disabled={isSubmitting}
+              disabled={false}
               style={styles.cancelButton}
               testID="cancel-button"
             />
@@ -187,7 +206,7 @@ export function RecipeForm({
               title={mode === 'create' ? 'Create Recipe' : 'Update Recipe'}
               variant="primary"
               onPress={handleSubmit}
-              disabled={!isValid || isSubmitting}
+              disabled={isSubmitting}
               loading={isSubmitting}
               style={styles.submitButton}
               testID="submit-button"

@@ -56,10 +56,16 @@ public class RecipesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateRecipe([FromBody] CreateRecipeRequest request)
     {
+        Console.WriteLine("In Create Recipe");
         var userId = GetUserId();
+        Console.WriteLine($"UserId from token: {userId}");
         if (userId == Guid.Empty)
+        {
+            Console.WriteLine("Authorization failed - no valid user ID");
             return Unauthorized();
+        }
 
+        Console.WriteLine("Running CreateRecipeCommand..");
         var command = new CreateRecipeCommand(
             request.Title,
             request.Description,
@@ -70,9 +76,15 @@ public class RecipesController : ControllerBase
             userId);
 
         var result = await _mediator.Send(command);
+        Console.WriteLine($"Result: {result}");
+        Console.WriteLine($"Result.IsSuccess: {result.IsSuccess}");
+        Console.WriteLine($"Result.IsFailure: {result.IsFailure}");
 
         if (result.IsFailure)
+        {
+            Console.WriteLine($"Recipe creation failed: {result.Error}");
             return BadRequest(new { error = result.Error });
+        }
 
         return CreatedAtAction(nameof(GetRecipeById), new { id = result.Value.Id }, result.Value);
     }

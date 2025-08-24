@@ -57,25 +57,31 @@ function IngredientItem({ control, index, ingredient, errors }: IngredientItemPr
               name={`ingredients.${index}.unit`}
               render={({ field: { onChange, value } }) => (
                 <Picker
-                  selectedValue={value}
-                  onValueChange={onChange}
+                  selectedValue={value || ""}
+                  onValueChange={(itemValue) => {
+                    if (itemValue !== "") {
+                      onChange(itemValue);
+                    }
+                  }}
                   style={styles.unitPicker}
                   testID={`ingredient-unit-${index}`}
+                  mode="dropdown"
                 >
-                  <Picker.Item 
-                    label="Unit" 
-                    value="" 
-                    color={colors.placeholder}
-                  />
-                  {commonUnits.map((unit) => (
-                    <Picker.Item
-                      key={unit}
-                      label={unit}
-                      value={unit}
-                      color={colors.text}
+                    <Picker.Item 
+                      label="Select unit" 
+                      value="" 
+                      color={colors.placeholder || '#999999'}
+                      enabled={false}
                     />
-                  ))}
-                </Picker>
+                    {commonUnits.map((unit) => (
+                      <Picker.Item
+                        key={unit}
+                        label={unit}
+                        value={unit}
+                        color={colors.text || '#000000'}
+                      />
+                    ))}
+                  </Picker>
               )}
             />
           </View>
@@ -211,6 +217,7 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
     borderRadius: 8,
     minHeight: 48,
+    overflow: 'hidden',
   },
   unitPickerContainerError: {
     borderColor: colors.error,
@@ -218,6 +225,9 @@ const styles = StyleSheet.create({
   unitPicker: {
     height: 48,
     color: colors.text,
+    backgroundColor: colors.inputBackground,
+    paddingHorizontal: 8,
+    fontSize: 16,
   },
   unitError: {
     ...typography.caption,

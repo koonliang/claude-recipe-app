@@ -18,32 +18,22 @@ export function RecipeFormScreen() {
   }, [router]);
 
   const handleSuccess = useCallback((recipe: Recipe) => {
+    console.log('Recipe creation success:', recipe);
     const successMessage = mode === 'create' 
       ? `Recipe "${recipe.title}" created successfully!`
       : `Recipe "${recipe.title}" updated successfully!`;
 
     // Show success message
-    Alert.alert(
-      'Success',
-      successMessage,
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            if (mode === 'create') {
-              // Navigate to the new recipe detail screen
-              router.replace({
-                pathname: '/recipe-detail',
-                params: { recipeId: recipe.id }
-              });
-            } else {
-              // Navigate back to recipe detail screen
-              router.back();
-            }
-          },
-        },
-      ]
-    );
+    console.log('Success message:', successMessage);
+    
+    // Navigate immediately to home page
+    console.log('Navigating to home page after success');
+    router.replace('/home');
+    
+    // Show success alert after navigation
+    setTimeout(() => {
+      Alert.alert('Success', successMessage);
+    }, 500);
   }, [mode, router]);
 
   const handleError = useCallback((error: string) => {

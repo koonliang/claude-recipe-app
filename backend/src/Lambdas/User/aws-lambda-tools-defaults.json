@@ -15,7 +15,7 @@
   "template-parameters": "",
   "msbuild-parameters": "",
   "framework": "net9.0",
-  "function-runtime": "dotnet8",
+  "function-runtime": "dotnet9",
   "function-memory-size": 512,
   "function-timeout": 30,
   "function-handler": "",

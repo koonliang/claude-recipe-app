@@ -75,23 +75,29 @@ export function BasicInfoSection({
             name="category"
             render={({ field: { onChange, value } }) => (
               <Picker
-                selectedValue={value}
-                onValueChange={onChange}
+                selectedValue={value || ""}
+                onValueChange={(itemValue) => {
+                  if (itemValue !== "") {
+                    onChange(itemValue);
+                  }
+                }}
                 style={styles.picker}
                 itemStyle={styles.pickerItem}
                 testID="recipe-category-picker"
+                mode="dropdown"
               >
                 <Picker.Item 
                   label="Select a category" 
                   value="" 
-                  color={colors.placeholder}
+                  color={colors.placeholder || '#999999'}
+                  enabled={false}
                 />
                 {recipeCategories.map((category) => (
                   <Picker.Item
                     key={category}
                     label={category}
                     value={category}
-                    color={colors.text}
+                    color={colors.text || '#000000'}
                   />
                 ))}
               </Picker>
@@ -152,6 +158,7 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
     borderRadius: 8,
     minHeight: 48,
+    overflow: 'hidden',
   },
   pickerContainerError: {
     borderColor: colors.error,
@@ -159,10 +166,13 @@ const styles = StyleSheet.create({
   picker: {
     height: 48,
     color: colors.text,
+    backgroundColor: colors.inputBackground,
+    paddingHorizontal: 8,
   },
   pickerItem: {
     ...typography.body,
     color: colors.text,
+    fontSize: 16,
   },
   categoryError: {
     ...typography.caption,

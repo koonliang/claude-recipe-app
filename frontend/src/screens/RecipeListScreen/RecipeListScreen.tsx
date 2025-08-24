@@ -55,8 +55,10 @@ export default function RecipeListScreen() {
   }, [refetch]);
 
   const handleAddRecipe = useCallback(() => {
-    // TODO: Navigate to recipe creation screen when implemented
-    console.log('Navigate to add recipe');
+    router.push({
+      pathname: '/recipe-form',
+      params: { mode: 'create' }
+    });
   }, []);
 
   const getEmptyStateType = useCallback(() => {

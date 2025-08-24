@@ -79,9 +79,9 @@ public static class DatabaseConfiguration
 
     private static IServiceCollection AddInMemoryDatabase(this IServiceCollection services, ILogger logger)
     {
-        var databaseName = $"RecipeApp_{Guid.NewGuid():N}";
+        var databaseName = "RecipeAppInMemory";
         
-        logger.LogWarning("Using in-memory database '{DatabaseName}' - data will not persist", databaseName);
+        logger.LogWarning("Using in-memory database '{DatabaseName}' - data will persist for session duration", databaseName);
 
         services.AddDbContext<RecipeAppDbContext>(options =>
         {
