@@ -5,6 +5,7 @@ using Core.Application.Configuration;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 
 // Load .env file for local development
@@ -72,6 +73,13 @@ builder.Services.AddAuthorization();
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 
 var app = builder.Build();
+
+// Apply database migrations
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<RecipeAppDbContext>();
+    context.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {
