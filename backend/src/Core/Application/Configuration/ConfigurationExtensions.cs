@@ -24,6 +24,19 @@ public static class ConfigurationExtensions
         services.Configure<ApiGatewayOptions>(options => configuration.GetSection(ApiGatewayOptions.SectionName).Bind(options));
         services.AddSingleton<IValidateOptions<ApiGatewayOptions>, DataAnnotationValidateOptions<ApiGatewayOptions>>();
 
+        // Add SeedDataOptions with environment variable override
+        services.Configure<SeedDataOptions>(options =>
+        {
+            configuration.GetSection(SeedDataOptions.SectionName).Bind(options);
+            
+            // Override with environment variable if present
+            var enableSeedingEnv = Environment.GetEnvironmentVariable("ENABLE_SEEDING");
+            if (!string.IsNullOrEmpty(enableSeedingEnv) && bool.TryParse(enableSeedingEnv, out var enableSeeding))
+            {
+                options.EnableSeeding = enableSeeding;
+            }
+        });
+
         return services;
     }
 

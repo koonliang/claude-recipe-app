@@ -18,6 +18,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IImageStorageService, ImageStorageService>();
+        services.AddScoped<ISeedDataService, SeedDataService>();
 
         return services;
     }

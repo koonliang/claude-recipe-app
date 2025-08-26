@@ -106,15 +106,39 @@ public class UpdateRecipeCommandHandler : ICommandHandler<UpdateRecipeCommand, R
         string? photoUrl = recipe.PhotoUrl;
         if (!string.IsNullOrWhiteSpace(request.Photo))
         {
-            // Delete old image if exists
-            if (!string.IsNullOrWhiteSpace(recipe.PhotoUrl))
+            try
             {
-                await _imageStorageService.DeleteImageAsync(recipe.PhotoUrl);
+                // Upload new image first
+                var fileName = $"recipe_{recipe.Id:N}";
+                var newPhotoUrl = await _imageStorageService.UploadImageAsync(request.Photo, fileName);
+                
+                // Delete old image only after successful upload
+                if (!string.IsNullOrWhiteSpace(recipe.PhotoUrl))
+                {
+                    try
+                    {
+                        await _imageStorageService.DeleteImageAsync(recipe.PhotoUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log deletion failure but don't fail the update
+                        _logger.LogWarning(ex, "Failed to delete old image, but continuing with update - RecipeId: {RecipeId}, OldPhotoUrl: {PhotoUrl}", 
+                            request.Id, recipe.PhotoUrl);
+                    }
+                }
+                
+                photoUrl = newPhotoUrl;
+                _logger.LogInformation("Successfully updated recipe photo - RecipeId: {RecipeId}, NewPhotoUrl: {PhotoUrl}", 
+                    request.Id, newPhotoUrl);
             }
-
-            // Upload new image
-            var fileName = $"recipe_{recipe.Id:N}";
-            photoUrl = await _imageStorageService.UploadImageAsync(request.Photo, fileName);
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to upload image, continuing with recipe update without photo change - RecipeId: {RecipeId}, Error: {Error}", 
+                    request.Id, ex.Message);
+                
+                // Keep existing photo URL and continue with recipe update
+                // Don't fail the entire update just because of image upload issues
+            }
         }
 
         // Update basic info

@@ -2,6 +2,7 @@ using Amazon.Lambda.AspNetCoreServer;
 using BuildingBlocks.Observability;
 using Infrastructure.Persistence;
 using Core.Application.Configuration;
+using Core.Application.Interfaces;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -101,11 +102,16 @@ builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 
 var app = builder.Build();
 
-// Ensure database is created for in-memory provider
+// Ensure database is created and seeded
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<RecipeAppDbContext>();
+    var seedDataService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
+    
     context.Database.EnsureCreated();
+    
+    // Run seeding if configured
+    await seedDataService.SeedAsync();
 }
 
 if (app.Environment.IsDevelopment())
