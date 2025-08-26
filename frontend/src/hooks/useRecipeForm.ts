@@ -9,7 +9,7 @@ import { RecipeFormMode } from '@/src/types/recipeForm';
 export interface UseRecipeFormParams {
   mode: RecipeFormMode;
   recipeId?: string;
-  onSuccess?: (recipe: Recipe) => void;
+  onSuccess?: (recipe: Recipe, successMessage?: string) => void;
   onError?: (error: string) => void;
 }
 
@@ -155,12 +155,15 @@ export function useRecipeForm({
         };
 
         let result: Recipe;
+        let successMessage: string | undefined;
 
         if (mode === 'create') {
           result = await apiService.createRecipe(formDataToSubmit);
         } else {
           if (!recipeId) throw new Error('Recipe ID is required for edit mode');
-          result = await apiService.updateRecipe(recipeId, formDataToSubmit);
+          const updateResponse = await apiService.updateRecipe(recipeId, formDataToSubmit);
+          result = updateResponse.recipe;
+          successMessage = updateResponse.message;
         }
 
         setState(prev => ({
@@ -170,7 +173,15 @@ export function useRecipeForm({
         }));
 
         console.log('Recipe saved successfully, calling onSuccess callback:', result);
-        onSuccess?.(result);
+        
+        // Show success message if we have one
+        if (successMessage) {
+          // For now, we'll pass the message in the onSuccess callback
+          // The parent component can decide how to display it
+          onSuccess?.(result, successMessage);
+        } else {
+          onSuccess?.(result);
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to save recipe';
         setState(prev => ({

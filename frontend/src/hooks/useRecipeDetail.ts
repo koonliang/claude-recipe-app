@@ -11,7 +11,7 @@ export interface UseRecipeDetailReturn {
   isLoading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  deleteRecipe: () => Promise<boolean>;
+  deleteRecipe: () => Promise<{ success: boolean; message?: string }>;
   toggleFavorite: () => Promise<void>;
   isDeleting: boolean;
   isToggling: boolean;
@@ -38,18 +38,18 @@ export const useRecipeDetail = ({ recipeId }: UseRecipeDetailOptions): UseRecipe
     }
   }, [recipeId]);
 
-  const deleteRecipe = useCallback(async (): Promise<boolean> => {
-    if (!recipe) return false;
+  const deleteRecipe = useCallback(async (): Promise<{ success: boolean; message?: string }> => {
+    if (!recipe) return { success: false };
     
     try {
       setIsDeleting(true);
       setError(null);
-      await apiService.deleteRecipe(recipe.id);
-      return true;
+      const response = await apiService.deleteRecipe(recipe.id);
+      return { success: true, message: response.message };
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete recipe');
       console.error('Failed to delete recipe:', err);
-      return false;
+      return { success: false };
     } finally {
       setIsDeleting(false);
     }

@@ -30,13 +30,17 @@ export default function RecipeDetailScreen() {
   } = useRecipeDetail({ recipeId: recipeId || '' });
 
   const handleDeleteConfirm = async () => {
-    const success = await deleteRecipe();
-    if (success) {
-      Alert.alert(
-        'Recipe Deleted', 
-        'The recipe has been successfully deleted.',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+    const result = await deleteRecipe();
+    if (result.success) {
+      const message = result.message || 'The recipe has been successfully deleted.';
+      
+      // Navigate back to home/recipe list immediately
+      router.replace('/home');
+      
+      // Show success message after navigation
+      setTimeout(() => {
+        Alert.alert('Success', message);
+      }, 500);
     } else {
       Alert.alert('Error', 'Failed to delete recipe. Please try again.');
     }

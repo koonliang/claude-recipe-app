@@ -86,6 +86,15 @@ export interface GetRecipesResponse {
   };
 }
 
+export interface UpdateRecipeResponse {
+  message: string;
+  recipe: RecipeDto;
+}
+
+export interface DeleteRecipeResponse {
+  message: string;
+}
+
 class RecipeService extends ApiClient {
 
   async getRecipes(params?: {
@@ -170,7 +179,7 @@ class RecipeService extends ApiClient {
     photo_url?: string;
     ingredients: { id?: string; name: string; quantity: string; unit: string }[];
     steps: { id?: string; instruction_text: string; step_number: number }[];
-  }): Promise<Recipe> {
+  }): Promise<{ message: string; recipe: Recipe }> {
     try {
       const request: UpdateRecipeRequest = {
         title: updates.title,
@@ -190,8 +199,11 @@ class RecipeService extends ApiClient {
         }))
       };
 
-      const response = await this.put<RecipeDto>(`/recipes/${id}`, request, true);
-      return this.mapRecipeDtoToRecipe(response);
+      const response = await this.put<UpdateRecipeResponse>(`/recipes/${id}`, request, true);
+      return {
+        message: response.message,
+        recipe: this.mapRecipeDtoToRecipe(response.recipe)
+      };
     } catch (error) {
       if (this.isApiError(error)) {
         throw error;
@@ -200,9 +212,12 @@ class RecipeService extends ApiClient {
     }
   }
 
-  async deleteRecipe(id: string): Promise<void> {
+  async deleteRecipe(id: string): Promise<{ message: string }> {
     try {
-      await this.delete(`/recipes/${id}`, true);
+      const response = await this.delete<DeleteRecipeResponse>(`/recipes/${id}`, true);
+      return {
+        message: response.message
+      };
     } catch (error) {
       if (this.isApiError(error)) {
         throw error;

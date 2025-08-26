@@ -33,7 +33,8 @@
       "Bash(/usr/bin/dotnet restore:*)",
       "Bash(/usr/bin/dotnet build:*)",
       "Bash(grep:*)",
-      "Bash(dotnet ef:*)"
+      "Bash(dotnet ef:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

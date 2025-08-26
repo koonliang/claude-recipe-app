@@ -17,11 +17,13 @@ export function RecipeFormScreen() {
     router.back();
   }, [router]);
 
-  const handleSuccess = useCallback((recipe: Recipe) => {
-    console.log('Recipe creation success:', recipe);
-    const successMessage = mode === 'create' 
+  const handleSuccess = useCallback((recipe: Recipe, backendMessage?: string) => {
+    console.log('Recipe success:', recipe, 'Backend message:', backendMessage);
+    
+    // Use backend message if available, otherwise generate default message
+    const successMessage = backendMessage || (mode === 'create' 
       ? `Recipe "${recipe.title}" created successfully!`
-      : `Recipe "${recipe.title}" updated successfully!`;
+      : `Recipe "${recipe.title}" updated successfully!`);
 
     // Show success message
     console.log('Success message:', successMessage);

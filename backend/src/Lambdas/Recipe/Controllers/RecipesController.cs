@@ -133,7 +133,7 @@ public class RecipesController : ControllerBase
             return BadRequest(new { error = result.Error });
         }
 
-        return Ok(result.Value);
+        return Ok(new { message = "Recipe updated successfully", recipe = result.Value });
     }
 
     [HttpDelete("{id:guid}")]
@@ -155,7 +155,7 @@ public class RecipesController : ControllerBase
             return BadRequest(new { error = result.Error });
         }
 
-        return NoContent();
+        return Ok(new { message = "Recipe deleted successfully" });
     }
 
     [HttpPost("{id:guid}/favorite")]

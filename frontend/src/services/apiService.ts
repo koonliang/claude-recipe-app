@@ -113,17 +113,19 @@ export const apiService = {
     photo_url?: string;
     ingredients: { id?: string; name: string; quantity: string; unit: string }[];
     steps: { id?: string; instruction_text: string; step_number: number }[];
-  }): Promise<Recipe> {
+  }): Promise<{ message: string; recipe: Recipe }> {
     if (isAnonymousModeEnabled()) {
-      return mockApiService.updateRecipe(id, updates as Partial<Recipe>);
+      const recipe = await mockApiService.updateRecipe(id, updates as Partial<Recipe>);
+      return { message: `Recipe "${recipe.title}" updated successfully!`, recipe };
     }
     
     return recipeService.updateRecipe(id, updates);
   },
 
-  async deleteRecipe(id: string): Promise<void> {
+  async deleteRecipe(id: string): Promise<{ message: string }> {
     if (isAnonymousModeEnabled()) {
-      return mockApiService.deleteRecipe(id);
+      await mockApiService.deleteRecipe(id);
+      return { message: "Recipe deleted successfully!" };
     }
     
     return recipeService.deleteRecipe(id);
