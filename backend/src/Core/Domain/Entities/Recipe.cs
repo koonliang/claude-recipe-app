@@ -43,11 +43,7 @@ public class Recipe : Entity
     public void UpdateIngredients(List<Ingredient> newIngredients)
     {
         Ingredients.Clear();
-        foreach (var ingredient in newIngredients)
-        {
-            ingredient.SetRecipeId(Id);
-            Ingredients.Add(ingredient);
-        }
+        Ingredients.AddRange(newIngredients);
         SetUpdatedAt();
     }
 
@@ -61,11 +57,7 @@ public class Recipe : Entity
     public void UpdateSteps(List<Step> newSteps)
     {
         Steps.Clear();
-        foreach (var step in newSteps)
-        {
-            step.SetRecipeId(Id);
-            Steps.Add(step);
-        }
+        Steps.AddRange(newSteps);
         SetUpdatedAt();
     }
 

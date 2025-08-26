@@ -32,7 +32,8 @@
       "Bash(/usr/bin/dotnet nuget locals:*)",
       "Bash(/usr/bin/dotnet restore:*)",
       "Bash(/usr/bin/dotnet build:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(dotnet ef:*)"
     ],
     "deny": []
   }

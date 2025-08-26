@@ -171,8 +171,52 @@ public class RecipeRepository : IRecipeRepository
 
     public async Task UpdateAsync(Recipe recipe, CancellationToken cancellationToken = default)
     {
-        _context.Recipes.Update(recipe);
-        await _context.SaveChangesAsync(cancellationToken);
+        _logger.LogDebug("UpdateAsync called - RecipeId: {RecipeId}, Title: {Title}", recipe.Id, recipe.Title);
+        
+        try
+        {
+            // Get the existing recipe with related entities
+            var existingRecipe = await _context.Recipes
+                .Include(r => r.Ingredients)
+                .Include(r => r.Steps)
+                .FirstOrDefaultAsync(r => r.Id == recipe.Id, cancellationToken);
+
+            if (existingRecipe == null)
+            {
+                _logger.LogError("Recipe not found for update - RecipeId: {RecipeId}", recipe.Id);
+                throw new InvalidOperationException($"Recipe with ID {recipe.Id} not found");
+            }
+
+            // Update basic properties
+            _context.Entry(existingRecipe).CurrentValues.SetValues(recipe);
+
+            // Handle ingredients - remove old ones and add new ones
+            _context.Ingredients.RemoveRange(existingRecipe.Ingredients);
+            foreach (var ingredient in recipe.Ingredients)
+            {
+                _context.Ingredients.Add(ingredient);
+            }
+
+            // Handle steps - remove old ones and add new ones
+            _context.Steps.RemoveRange(existingRecipe.Steps);
+            foreach (var step in recipe.Steps)
+            {
+                _context.Steps.Add(step);
+            }
+
+            var changes = await _context.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Recipe updated successfully - RecipeId: {RecipeId}, Changes: {Changes}", recipe.Id, changes);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogError(ex, "Concurrency conflict during recipe update - RecipeId: {RecipeId}", recipe.Id);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating recipe - RecipeId: {RecipeId}", recipe.Id);
+            throw;
+        }
     }
 
     public async Task DeleteAsync(Recipe recipe, CancellationToken cancellationToken = default)

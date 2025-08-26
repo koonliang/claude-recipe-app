@@ -96,6 +96,18 @@ public class RecipesController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateRecipe(Guid id, [FromBody] UpdateRecipeRequest request)
     {
+        // Add model state validation logging
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(x => x.Value.Errors.Count > 0)
+                .Select(x => new { Field = x.Key, Errors = x.Value.Errors.Select(e => e.ErrorMessage) })
+                .ToList();
+            
+            var errorMessage = string.Join("; ", errors.SelectMany(e => e.Errors));
+            return BadRequest(new { error = errorMessage, details = errors });
+        }
+
         var userId = GetUserId();
         if (userId == Guid.Empty)
             return Unauthorized();
