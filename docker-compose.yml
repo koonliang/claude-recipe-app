@@ -1,25 +1,4 @@
 services:
-  # MySQL Database
-  mysql:
-    image: mysql:8.0
-    container_name: recipe-app-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: dev_password
-      MYSQL_DATABASE: RecipeApp_Dev
-      MYSQL_USER: app_user
-      MYSQL_PASSWORD: dev_password
-    ports:
-      - "23306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - recipe-app-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-
   # .NET Backend Services (Recipe, User, Authorizer)
   backend:
     build:
@@ -27,12 +6,9 @@ services:
       dockerfile: Dockerfile
     container_name: recipe-app-backend
     restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - DATABASE__CONNECTIONSTRING=Server=mysql;Database=RecipeApp_Dev;User=root;Password=dev_password;
+      - DATABASE__CONNECTIONSTRING=Server=host.docker.internal;Database=RecipeApp_Dev;User=admin;Password=pass1234;
       - DATABASE__USEIMMEMORYFALLBACK=false
       - DATABASE_TYPE=mysql
       - JWT__SECRETKEY=development-super-secret-key-that-must-be-at-least-32-characters-long-for-local-dev
@@ -50,6 +26,8 @@ services:
       - "5002:5002"  # Authorizer Service
     networks:
       - recipe-app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app/src:ro  # Optional: for development hot reload
 
@@ -79,6 +57,3 @@ networks:
   recipe-app-network:
     driver: bridge
 
-volumes:
-  mysql_data:
-    driver: local
