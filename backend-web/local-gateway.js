@@ -6,10 +6,10 @@ const axios = require('axios');
 const app = express();
 const PORT = 3000;
 
-// Configuration for target services
-const USER_SERVICE_URL = 'http://localhost:5001';
-const RECIPE_SERVICE_URL = 'http://localhost:5000';
-const AUTHORIZER_SERVICE_URL = 'http://localhost:5002';
+// Configuration for target services - use environment variables for Docker deployment
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:5001';
+const RECIPE_SERVICE_URL = process.env.RECIPE_SERVICE_URL || 'http://localhost:5000';
+const AUTHORIZER_SERVICE_URL = process.env.AUTHORIZER_SERVICE_URL || 'http://localhost:5002';
 
 // CORS configuration for Expo development
 app.use(cors({
