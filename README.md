@@ -28,14 +28,18 @@ The project follows **Clean Architecture** principles with clear separation betw
 │  │   Screens   │  │ Components  │  │  Services & Hooks   │  │
 │  └─────────────┘  └─────────────┘  └─────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
-                              │ HTTP/REST
+                              │ HTTP/REST + JWT
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    API Gateway / Local Gateway              │
-│  ┌─────────────────┐              ┌─────────────────────┐   │
-│  │   /auth/*       │              │    /recipes/*       │   │
-│  │ User Lambda     │              │  Recipe Lambda      │   │
-│  └─────────────────┘              └─────────────────────┘   │
+│                 API Gateway / Local Gateway                 │
+│  ┌───────────────┐ ┌───────────────┐ ┌─────────────────────┐│
+│  │   /auth/*     │ │ Authorization │ │    /recipes/*       ││
+│  │ User Lambda   │ │   Middleware  │ │  Recipe Lambda      ││
+│  │ (port 5001)   │ │      ↓        │ │  (port 5000)        ││
+│  └───────────────┘ │ Authorizer    │ └─────────────────────┘│
+│                    │ Lambda        │                        │
+│                    │ (port 5002)   │                        │
+│                    └───────────────┘                        │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -68,7 +72,8 @@ The project follows **Clean Architecture** principles with clear separation betw
 - **AWS Lambda** - Serverless compute (User, Recipe, Authorizer functions)
 - **Entity Framework Core** - ORM with MySQL provider
 - **MediatR** - CQRS pattern implementation
-- **JWT Authentication** - Secure token-based auth with custom authorizer
+- **Centralized Authorization** - Custom JWT Authorizer Lambda with gateway-level security
+- **JWT Authentication** - Secure token-based auth with proper separation of concerns
 - **Serilog** - Structured logging
 
 ### **Local Development**
@@ -109,7 +114,7 @@ claude-recipe-app/
 │   │   ├── Lambdas/
 │   │   │   ├── User/         # Authentication Lambda (port 5001)
 │   │   │   ├── Recipe/       # Recipe Management Lambda (port 5000)
-│   │   │   └── Authorizer/   # Custom JWT Authorizer
+│   │   │   └── Authorizer/   # JWT Authorization Lambda (port 5002)
 │   │   └── IaC/
 │   │       ├── sam/          # AWS SAM templates
 │   │       └── terraform/    # Terraform configurations
@@ -149,6 +154,7 @@ dotnet build
 # Set up environment variables (copy and configure)
 cp src/Lambdas/User/environment-variables.example src/Lambdas/User/.env
 cp src/Lambdas/Recipe/environment-variables.example src/Lambdas/Recipe/.env
+cp src/Lambdas/Authorizer/.env.example src/Lambdas/Authorizer/.env
 
 # Start User Lambda (Terminal 1)
 cd src/Lambdas/User
@@ -157,12 +163,16 @@ dotnet run  # Runs on http://localhost:5001
 # Start Recipe Lambda (Terminal 2)  
 cd src/Lambdas/Recipe
 dotnet run  # Runs on http://localhost:5000
+
+# Start Authorizer Lambda (Terminal 3)
+cd src/Lambdas/Authorizer
+dotnet run  # Runs on http://localhost:5002
 ```
 
 ### 3. Local Gateway Setup
 
 ```bash
-# Terminal 3: Start the local API gateway
+# Terminal 4: Start the local API gateway
 cd backend-web
 npm install
 npm start  # Runs on http://localhost:3000
@@ -171,7 +181,7 @@ npm start  # Runs on http://localhost:3000
 ### 4. Frontend Setup
 
 ```bash
-# Terminal 4: Start the mobile app
+# Terminal 5: Start the mobile app
 cd frontend
 npm install
 
@@ -227,17 +237,39 @@ In demo mode, the app uses mock data and simulates all API interactions locally.
 
 ### Local Development Workflow
 
-1. **Start Backend Services**: Run User and Recipe Lambdas
-2. **Start Local Gateway**: Route requests between services  
+1. **Start Backend Services**: Run User, Recipe, and Authorizer Lambdas
+2. **Start Local Gateway**: Route requests with authorization middleware  
 3. **Start Mobile App**: Launch Expo development server
 4. **Development**: Code, test, and hot-reload changes
+
+### Authorization Architecture
+
+The app uses a **centralized authorization system** with proper separation of concerns:
+
+- **User Lambda**: Handles authentication (login, signup, tokens)
+- **Authorizer Lambda**: Validates JWT tokens and extracts user context
+- **Recipe Lambda**: Focuses on business logic, trusts authorization headers
+- **Gateway**: Orchestrates authorization flow before routing requests
 
 ### API Documentation
 
 When running locally, access Swagger documentation:
 - **User API**: http://localhost:5001/swagger
 - **Recipe API**: http://localhost:5000/swagger
+- **Authorizer API**: http://localhost:5002/swagger
 - **Gateway Health**: http://localhost:3000/health
+
+### Request Flow
+
+```
+Frontend Request (JWT token in header)
+    ↓
+Gateway (port 3000)
+    ↓
+Authorizer Lambda (port 5002) - Validates JWT & extracts user context
+    ↓ [if authorized]
+Recipe/User Lambda (ports 5000/5001) - Receives user context in headers
+```
 
 ### Testing
 

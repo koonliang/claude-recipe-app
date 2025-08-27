@@ -1,14 +1,15 @@
 # Recipe App Local Gateway
 
-A lightweight Express.js gateway for local development that routes requests between the frontend and Lambda services running on different ports.
+A lightweight Express.js gateway for local development that routes requests between the frontend and Lambda services with **centralized authorization**.
 
 ## Overview
 
-This gateway solves the problem of having multiple backend services running on different ports during local development:
+This gateway solves the problem of having multiple backend services running on different ports during local development while providing **authorization middleware** for secure request handling:
 
 - **User Lambda** (port 5001): Handles authentication (`/auth/*`)
-- **Recipe Lambda** (port 5000): Handles recipes (`/recipes/*`)
-- **Gateway** (port 3000): Routes requests to appropriate services
+- **Recipe Lambda** (port 5000): Handles recipes (`/recipes/*`)  
+- **Authorizer Lambda** (port 5002): Validates JWT tokens and extracts user context
+- **Gateway** (port 3000): Routes requests with authorization orchestration
 
 ## Quick Start
 
@@ -21,7 +22,7 @@ npm install
 
 ### 2. Start the Services
 
-You need to start all three components:
+You need to start all four components:
 
 ```bash
 # Terminal 1: Start User Lambda (port 5001)
@@ -32,7 +33,11 @@ dotnet run
 cd backend/src/Lambdas/Recipe
 dotnet run
 
-# Terminal 3: Start Local Gateway (port 3000)
+# Terminal 3: Start Authorizer Lambda (port 5002)
+cd backend/src/Lambdas/Authorizer
+dotnet run
+
+# Terminal 4: Start Local Gateway (port 3000)
 cd backend-web
 npm start
 ```
@@ -47,17 +52,29 @@ EXPO_PUBLIC_API_BASE_URL=http://localhost:3000
 EXPO_PUBLIC_ANONYMOUS_MODE=false
 ```
 
-## Service Routes
+## Service Routes & Authorization Flow
 
-The gateway routes requests as follows:
+The gateway routes requests with **authorization middleware**:
 
+### Authentication Requests (No Authorization Required)
 | Frontend Request | Gateway Routes To | Target Service |
 |------------------|-------------------|----------------|
 | `/auth/login` | `http://localhost:5001/auth/login` | User Lambda |
 | `/auth/signup` | `http://localhost:5001/auth/signup` | User Lambda |
-| `/auth/profile` | `http://localhost:5001/auth/profile` | User Lambda |
-| `/recipes` | `http://localhost:5000/recipes` | Recipe Lambda |
-| `/recipes/123` | `http://localhost:5000/recipes/123` | Recipe Lambda |
+| `/auth/forgot-password` | `http://localhost:5001/auth/forgot-password` | User Lambda |
+
+### Protected Requests (Authorization Required)
+| Frontend Request | Authorization Flow | Target Service |
+|------------------|-------------------|----------------|
+| `/recipes/*` | Gateway → Authorizer (5002) → Recipe (5000) | Recipe Lambda |
+| `/auth/profile` | Gateway → Authorizer (5002) → User (5001) | User Lambda |
+
+### Authorization Process
+1. **Request received** with JWT token in `Authorization` header
+2. **Authorizer called** at `http://localhost:5002/authorize` 
+3. **Token validated** and user context extracted
+4. **Request forwarded** with user context in `X-User-Id` header
+5. **Target service** trusts the user context from gateway
 
 ## Development Features
 
@@ -67,11 +84,13 @@ curl http://localhost:3000/health
 ```
 
 ### Request Logging
-The gateway logs all requests and responses for debugging:
+The gateway logs all requests, authorization checks, and responses:
 ```
-[2024-01-01T12:00:00.000Z] POST /auth/login
-🔄 Proxying to User service: POST http://localhost:5001/auth/login
-✅ User service response: 200
+[2024-01-01T12:00:00.000Z] GET /recipes
+🔐 Calling Authorizer Lambda for authorization...
+✅ Authorization successful for user: 123e4567-e89b-12d3-a456-426614174000
+🔄 Proxying to Recipe service: GET http://localhost:5000/recipes
+✅ Recipe service response: 200
 ```
 
 ### CORS Support
@@ -103,8 +122,18 @@ npm test
 
 ### "User/Recipe service unavailable"
 - Check that the respective Lambda service is running
-- Verify the correct port (User: 5001, Recipe: 5000)
+- Verify the correct ports (User: 5001, Recipe: 5000, Authorizer: 5002)
 - Check for port conflicts
+
+### "Authorizer service unavailable"
+- Ensure Authorizer Lambda is running on port 5002
+- Check if JWT configuration is consistent across services
+- Verify `.env` files have matching JWT secret keys
+
+### "Authorization failed" 
+- Check JWT token format and expiration
+- Verify JWT secret key matches between User and Authorizer Lambdas
+- Ensure frontend is sending tokens in `Authorization: Bearer <token>` format
 
 ### CORS Errors
 - Ensure Expo is running on expected ports
@@ -120,9 +149,10 @@ npm test
 Edit the configuration in `local-gateway.js`:
 
 ```javascript
-const USER_SERVICE_URL = 'http://localhost:5001';    // User Lambda port
-const RECIPE_SERVICE_URL = 'http://localhost:5000';  // Recipe Lambda port
-const PORT = 3000;                                   // Gateway port
+const USER_SERVICE_URL = 'http://localhost:5001';       // User Lambda port
+const RECIPE_SERVICE_URL = 'http://localhost:5000';     // Recipe Lambda port
+const AUTHORIZER_SERVICE_URL = 'http://localhost:5002'; // Authorizer Lambda port
+const PORT = 3000;                                      // Gateway port
 ```
 
 ### Adding New Routes
@@ -145,16 +175,16 @@ This gateway is only for local development. In production:
 
 ## Architecture Comparison
 
-**Local Development (with Gateway):**
+**Local Development (with Authorization Gateway):**
 ```
-Frontend → Gateway (port 3000) → User Lambda (port 5001)
-                                → Recipe Lambda (port 5000)
+Frontend → Gateway (port 3000) → Authorizer Lambda (port 5002) → Recipe Lambda (port 5000)
+                                → User Lambda (port 5001)
 ```
 
-**Production (AWS):**
+**Production (AWS with API Gateway Custom Authorizer):**
 ```
-Frontend → API Gateway → User Lambda
-                      → Recipe Lambda
+Frontend → API Gateway → Custom Authorizer → User Lambda
+                                          → Recipe Lambda
 ```
 
 This ensures consistent behavior between development and production environments.
