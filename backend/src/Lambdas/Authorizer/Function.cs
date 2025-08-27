@@ -27,16 +27,8 @@ public class Function
             .AddEnvironmentVariables()
             .Build();
 
-        // Validate configuration on startup
-        try
-        {
-            configuration.ValidateConfigurationOnStartup();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Configuration validation failed: {ex.Message}");
-            throw;
-        }
+        // Skip shared configuration validation - Function only needs JWT settings
+        // configuration.ValidateConfigurationOnStartup();
 
         var services = new ServiceCollection();
         ConfigureServices(services, configuration);
@@ -50,8 +42,8 @@ public class Function
         services.AddSingleton(configuration);
         services.AddLogging(builder => builder.AddConsole());
         
-        // Add configuration options with validation
-        services.AddConfigurationOptions(configuration);
+        // Skip shared configuration options - only add JWT configuration
+        // services.AddConfigurationOptions(configuration);
         
         services.AddScoped<ITokenValidator, TokenValidator>();
         

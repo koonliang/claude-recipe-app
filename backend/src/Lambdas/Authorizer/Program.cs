@@ -12,16 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add environment variables to configuration
 builder.Configuration.AddEnvironmentVariables();
 
-// Validate configuration on startup
-try
-{
-    builder.Configuration.ValidateConfigurationOnStartup();
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Configuration validation failed: {ex.Message}");
-    throw;
-}
+// Skip shared configuration validation - Authorizer only needs JWT settings
+// builder.Configuration.ValidateConfigurationOnStartup();
 
 builder.Host.UseSerilogLogging();
 
@@ -41,8 +33,8 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add configuration options with validation
-builder.Services.AddConfigurationOptions(builder.Configuration);
+// Skip shared configuration options - only add JWT configuration
+// builder.Services.AddConfigurationOptions(builder.Configuration);
 
 // Add JWT options
 builder.Services.AddSingleton<JwtOptions>(provider => 
