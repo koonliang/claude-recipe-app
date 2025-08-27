@@ -1,6 +1,7 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
+const axios = require('axios');
 
 const app = express();
 const PORT = 3000;
@@ -8,6 +9,7 @@ const PORT = 3000;
 // Configuration for target services
 const USER_SERVICE_URL = 'http://localhost:5001';
 const RECIPE_SERVICE_URL = 'http://localhost:5000';
+const AUTHORIZER_SERVICE_URL = 'http://localhost:5002';
 
 // CORS configuration for Expo development
 app.use(cors({
@@ -38,6 +40,79 @@ app.use((req, res, next) => {
   next();
 });
 
+// Authorization middleware for recipe routes
+const authorizeRequest = async (req, res, next) => {
+  // Skip authorization for non-recipe routes
+  if (!req.path.startsWith('/recipes')) {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({
+      error: 'Authorization header missing',
+      message: 'Please provide a valid authorization token'
+    });
+  }
+
+  try {
+    console.log('🔐 Calling Authorizer Lambda for authorization...');
+    
+    // Call the Authorizer Lambda function
+    const authResponse = await axios.post(`${AUTHORIZER_SERVICE_URL}/authorize`, {
+      authorizationToken: authHeader.replace('Bearer ', ''),
+      methodArn: `execute-api:/*/${req.method}${req.path}`,
+      httpMethod: req.method,
+      headers: req.headers
+    }, {
+      timeout: 5000,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (authResponse.data && authResponse.data.policyDocument?.statement?.[0]?.effect === 'Allow') {
+      // Authorization successful - extract user context
+      const context = authResponse.data.context || {};
+      const userId = context.userId || authResponse.data.principalId;
+      
+      console.log('✅ Authorization successful for user:', userId);
+      
+      // Add user context to request headers for the Recipe Lambda
+      req.headers['X-User-Id'] = userId;
+      if (context.email) {
+        req.headers['X-User-Email'] = context.email;
+      }
+      
+      return next();
+    } else {
+      console.log('❌ Authorization denied by Authorizer Lambda');
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'You do not have permission to access this resource'
+      });
+    }
+  } catch (error) {
+    console.error('❌ Authorization error:', error.message);
+    
+    if (error.code === 'ECONNREFUSED') {
+      return res.status(502).json({
+        error: 'Authorizer service unavailable',
+        message: `Failed to connect to Authorizer Lambda at ${AUTHORIZER_SERVICE_URL}`,
+        suggestion: 'Make sure the Authorizer Lambda is running on port 5002'
+      });
+    }
+    
+    return res.status(401).json({
+      error: 'Authorization failed',
+      message: 'Unable to verify your authorization token'
+    });
+  }
+};
+
+// Apply authorization middleware globally
+app.use(authorizeRequest);
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
@@ -45,7 +120,8 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     services: {
       user: USER_SERVICE_URL,
-      recipe: RECIPE_SERVICE_URL
+      recipe: RECIPE_SERVICE_URL,
+      authorizer: AUTHORIZER_SERVICE_URL
     }
   });
 });
@@ -106,7 +182,7 @@ app.use('*', (req, res) => {
     message: `No service configured for ${req.originalUrl}`,
     availableRoutes: [
       '/auth/* -> User service (port 5001)',
-      '/recipes/* -> Recipe service (port 5000)',
+      '/recipes/* -> Recipe service (port 5000) [with authorization]',
       '/health -> Gateway health check'
     ]
   });
@@ -126,12 +202,13 @@ app.listen(PORT, () => {
   console.log(`🚀 Local API Gateway running on http://localhost:${PORT}`);
   console.log('📍 Route configuration:');
   console.log(`   /auth/*    -> ${USER_SERVICE_URL}`);
-  console.log(`   /recipes/* -> ${RECIPE_SERVICE_URL}`);
+  console.log(`   /recipes/* -> ${RECIPE_SERVICE_URL} [with authorization via ${AUTHORIZER_SERVICE_URL}]`);
   console.log(`   /health    -> Gateway health check`);
   console.log('');
-  console.log('💡 Make sure both Lambda services are running:');
-  console.log(`   User Lambda:   ${USER_SERVICE_URL}`);
-  console.log(`   Recipe Lambda: ${RECIPE_SERVICE_URL}`);
+  console.log('💡 Make sure all Lambda services are running:');
+  console.log(`   User Lambda:       ${USER_SERVICE_URL}`);
+  console.log(`   Recipe Lambda:     ${RECIPE_SERVICE_URL}`);
+  console.log(`   Authorizer Lambda: ${AUTHORIZER_SERVICE_URL}`);
   console.log('');
   console.log('🔍 Test the gateway:');
   console.log(`   curl http://localhost:${PORT}/health`);

@@ -2,15 +2,12 @@ using Core.Application.Commands.Recipe;
 using Core.Application.DTOs;
 using Core.Application.Queries.Recipe;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Recipe.Controllers;
 
 [ApiController]
 [Route("recipes")]
-[Authorize]
 public class RecipesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -22,8 +19,14 @@ public class RecipesController : ControllerBase
 
     private Guid GetUserId()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
+        // User ID is now provided by the backend-web gateway from the Authorizer Lambda
+        var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
+        if (string.IsNullOrEmpty(userIdHeader))
+        {
+            throw new UnauthorizedAccessException("User ID not provided by authorizer");
+        }
+        
+        return Guid.TryParse(userIdHeader, out var userId) ? userId : throw new UnauthorizedAccessException("Invalid user ID format");
     }
 
     [HttpGet]
@@ -34,8 +37,6 @@ public class RecipesController : ControllerBase
         [FromQuery] int limit = 20)
     {
         var userId = GetUserId();
-        if (userId == Guid.Empty)
-            return Unauthorized();
 
         var query = new GetRecipesQuery(category, search, page, limit, userId);
         var result = await _mediator.Send(query);
@@ -57,8 +58,6 @@ public class RecipesController : ControllerBase
     public async Task<IActionResult> CreateRecipe([FromBody] CreateRecipeRequest request)
     {
         var userId = GetUserId();
-        if (userId == Guid.Empty)
-            return Unauthorized();
 
         var command = new CreateRecipeCommand(
             request.Title,
@@ -81,8 +80,6 @@ public class RecipesController : ControllerBase
     public async Task<IActionResult> GetRecipeById(Guid id)
     {
         var userId = GetUserId();
-        if (userId == Guid.Empty)
-            return Unauthorized();
 
         var query = new GetRecipeByIdQuery(id, userId);
         var result = await _mediator.Send(query);
@@ -109,8 +106,6 @@ public class RecipesController : ControllerBase
         }
 
         var userId = GetUserId();
-        if (userId == Guid.Empty)
-            return Unauthorized();
 
         var command = new UpdateRecipeCommand(
             id,
@@ -140,8 +135,6 @@ public class RecipesController : ControllerBase
     public async Task<IActionResult> DeleteRecipe(Guid id)
     {
         var userId = GetUserId();
-        if (userId == Guid.Empty)
-            return Unauthorized();
 
         var command = new DeleteRecipeCommand(id, userId);
         var result = await _mediator.Send(command);
@@ -162,8 +155,6 @@ public class RecipesController : ControllerBase
     public async Task<IActionResult> AddToFavorites(Guid id)
     {
         var userId = GetUserId();
-        if (userId == Guid.Empty)
-            return Unauthorized();
 
         var command = new ToggleFavoriteCommand(id, true, userId);
         var result = await _mediator.Send(command);
@@ -182,8 +173,6 @@ public class RecipesController : ControllerBase
     public async Task<IActionResult> RemoveFromFavorites(Guid id)
     {
         var userId = GetUserId();
-        if (userId == Guid.Empty)
-            return Unauthorized();
 
         var command = new ToggleFavoriteCommand(id, false, userId);
         var result = await _mediator.Send(command);

@@ -4,9 +4,6 @@ using Infrastructure.Persistence;
 using Core.Application.Configuration;
 using Core.Application.Interfaces;
 using DotNetEnv;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 // Load .env file for local development
 Env.Load();
@@ -75,28 +72,7 @@ builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(Core.Application.Commands.Recipe.CreateRecipeCommand).Assembly);
 });
 
-// Add JWT Authentication
-var jwtOptions = builder.Configuration.GetSection("Jwt").Get<Core.Application.Configuration.JwtOptions>();
-if (jwtOptions != null)
-{
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtOptions.SecretKey)),
-                ValidateIssuer = true,
-                ValidIssuer = jwtOptions.Issuer,
-                ValidateAudience = true,
-                ValidAudience = jwtOptions.Audience,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
-        });
-}
-
-builder.Services.AddAuthorization();
+// Authorization will be handled by the Authorizer Lambda
 
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 
@@ -130,8 +106,7 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
+// Authentication and authorization removed - handled by Authorizer Lambda
 app.MapControllers();
 
 app.Run();

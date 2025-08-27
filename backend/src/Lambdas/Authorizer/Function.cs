@@ -4,6 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Core.Application.Configuration;
+using Authorizer.Services;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -49,6 +54,13 @@ public class Function
         services.AddConfigurationOptions(configuration);
         
         services.AddScoped<ITokenValidator, TokenValidator>();
+        
+        // Add JWT options
+        services.AddSingleton(provider => 
+        {
+            var config = provider.GetRequiredService<IConfiguration>();
+            return config.GetSection("Jwt").Get<JwtOptions>() ?? throw new InvalidOperationException("JWT configuration is missing");
+        });
     }
 
     public APIGatewayCustomAuthorizerResponse FunctionHandler(APIGatewayCustomAuthorizerRequest request, ILambdaContext context)
@@ -62,13 +74,27 @@ public class Function
             var token = ExtractToken(request);
             
             var isValid = tokenValidator.ValidateToken(token);
-            var principalId = isValid ? "user123" : "anonymous";
             
-            var policy = GeneratePolicy(principalId, isValid ? "Allow" : "Deny", request.MethodArn);
-            
-            _logger.LogInformation("Authorization {Result} for token", isValid ? "granted" : "denied");
-            
-            return policy;
+            if (isValid)
+            {
+                var principal = tokenValidator.GetPrincipal(token);
+                var userId = principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "unknown";
+                var email = principal?.FindFirst(ClaimTypes.Email)?.Value ?? "";
+                
+                var policy = GeneratePolicy(userId, "Allow", request.MethodArn, new Dictionary<string, object>
+                {
+                    { "userId", userId },
+                    { "email", email }
+                });
+                
+                _logger.LogInformation("Authorization granted for user: {UserId}", userId);
+                return policy;
+            }
+            else
+            {
+                _logger.LogInformation("Authorization denied - invalid token");
+                return GeneratePolicy("anonymous", "Deny", request.MethodArn);
+            }
         }
         catch (Exception ex)
         {
@@ -87,9 +113,9 @@ public class Function
         return request.AuthorizationToken ?? string.Empty;
     }
 
-    private static APIGatewayCustomAuthorizerResponse GeneratePolicy(string principalId, string effect, string resource)
+    private static APIGatewayCustomAuthorizerResponse GeneratePolicy(string principalId, string effect, string resource, Dictionary<string, object>? context = null)
     {
-        return new APIGatewayCustomAuthorizerResponse
+        var response = new APIGatewayCustomAuthorizerResponse
         {
             PrincipalID = principalId,
             PolicyDocument = new APIGatewayCustomAuthorizerPolicy
@@ -106,33 +132,18 @@ public class Function
                 }
             }
         };
-    }
-}
 
-public interface ITokenValidator
-{
-    bool ValidateToken(string token);
-}
-
-public class TokenValidator : ITokenValidator
-{
-    private readonly ILogger<TokenValidator> _logger;
-
-    public TokenValidator(ILogger<TokenValidator> logger)
-    {
-        _logger = logger;
-    }
-
-    public bool ValidateToken(string token)
-    {
-        _logger.LogInformation("Validating token");
-        
-        if (string.IsNullOrEmpty(token))
+        // Add context if provided
+        if (context != null)
         {
-            _logger.LogWarning("Token is null or empty");
-            return false;
+            response.Context = new APIGatewayCustomAuthorizerContextOutput();
+            foreach (var kvp in context)
+            {
+                response.Context.Add(kvp.Key, kvp.Value);
+            }
         }
 
-        return token == "valid-token";
+        return response;
     }
 }
+
