@@ -153,16 +153,37 @@ CREATE DATABASE RecipeApp_Dev;
 CREATE USER 'admin'@'%' IDENTIFIED BY 'pass1234';
 GRANT ALL PRIVILEGES ON RecipeApp_Dev.* TO 'admin'@'%';
 
-# 2. Clone and start backend services
+# 2. Clone and start backend services and gateway
 git clone <repository-url>
 cd claude-recipe-app
-docker-compose up backend --build    # Terminal 1
-
-# 3. Start API gateway
-cd backend-web && npm install && npm start    # Terminal 2
+docker-compose up -d
+# Services will be available at:
+# - Gateway Service: http://localhost:3000
+# - User Service (Auth): http://localhost:5001
+# - Recipe Service: http://localhost:5000  
+# - Authorizer Service: http://localhost:5002
 
 # 4. Start mobile app  
-cd frontend && npm install && npm start    # Terminal 3
+cd frontend && npm install && npm start
+```
+
+#### Container Management Commands
+
+```bash
+# View running containers and logs
+docker-compose ps
+docker-compose logs backend
+docker-compose logs gateway
+
+# Rebuild containers after code changes
+docker-compose build backend
+docker-compose up backend --build
+
+# Stop and remove containers
+docker-compose down
+
+# View container resource usage
+docker stats
 ```
 
 ### 🔧 Option B: Native Development
@@ -247,227 +268,6 @@ cd frontend && npm start
 ```
 
 In demo mode, the app uses mock data and simulates all API interactions locally.
-
-## 🐳 Docker Development
-
-MyRecipeBox supports **full containerization** with Docker Compose for streamlined development. All backend services (.NET Lambda functions) can run as containers with seamless host MySQL connectivity.
-
-### Container Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Docker Host Environment                  │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │              Docker Compose Services                  │  │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │  │
-│  │  │ Backend     │  │ API Gateway │  │   Frontend      │ │  │
-│  │  │ Container   │  │ Container   │  │   (Native)      │ │  │
-│  │  │ ┌─────────┐ │  │ (Node.js)   │  │                 │ │  │
-│  │  │ │User:5001│ │  │ Port 3000   │  │  Expo Dev       │ │  │
-│  │  │ │Recipe:  │ │  └─────────────┘  │  Server         │ │  │
-│  │  │ │  5000   │ │                   │                 │ │  │
-│  │  │ │Auth:5002│ │                   │                 │ │  │
-│  │  │ └─────────┘ │                   │                 │ │  │
-│  │  └─────────────┘                   └─────────────────┘ │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                              │                              │
-│                              ▼ host.docker.internal         │
-│                    ┌─────────────────┐                      │
-│                    │   Host MySQL    │                      │
-│                    │   Port 3306     │                      │
-│                    │ (RecipeApp_Dev) │                      │
-│                    └─────────────────┘                      │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Prerequisites for Docker Setup
-
-- **Docker** and **Docker Compose**
-- **Node.js** 18+ (for frontend)
-- **MySQL** running on host (port 3306)
-- **Expo CLI**: `npm install -g @expo/cli`
-
-### Docker Quick Start
-
-#### 1. Setup Host MySQL Database
-
-Ensure you have MySQL running on your host with:
-- **Database**: `RecipeApp_Dev`
-- **User**: `admin`
-- **Password**: `pass1234`
-- **Port**: `3306`
-
-```sql
--- Create database and user (run as MySQL root)
-CREATE DATABASE RecipeApp_Dev;
-CREATE USER 'admin'@'%' IDENTIFIED BY 'pass1234';
-GRANT ALL PRIVILEGES ON RecipeApp_Dev.* TO 'admin'@'%';
-FLUSH PRIVILEGES;
-```
-
-#### 2. Start Backend Services with Docker
-
-```bash
-# Clone and navigate to project
-git clone <repository-url>
-cd claude-recipe-app
-
-# Build and start all backend services
-docker-compose up backend --build
-
-# Services will be available at:
-# - User Service (Auth): http://localhost:5001
-# - Recipe Service: http://localhost:5000  
-# - Authorizer Service: http://localhost:5002
-```
-
-#### 3. Start API Gateway
-
-```bash
-# Terminal 2: Start the local API gateway
-cd backend-web
-npm install
-npm start  # Runs on http://localhost:3000
-```
-
-#### 4. Start Frontend
-
-```bash
-# Terminal 3: Start the mobile app
-cd frontend
-npm install
-
-# Configure for authenticated mode
-echo "EXPO_PUBLIC_ANONYMOUS_MODE=false" > .env
-echo "EXPO_PUBLIC_API_BASE_URL=http://localhost:3000" >> .env
-
-# Start Expo development server
-npm start
-```
-
-### Docker Configuration Details
-
-#### Connection String Configuration
-The containers are configured to connect to host MySQL using `host.docker.internal`:
-
-```bash
-# Environment variable in docker-compose.yml
-DATABASE__CONNECTIONSTRING=Server=host.docker.internal;Database=RecipeApp_Dev;User=admin;Password=pass1234;
-```
-
-#### Service Ports
-- **User Lambda**: `5001` (Authentication, signup, login)
-- **Recipe Lambda**: `5000` (Recipe CRUD operations)
-- **Authorizer Lambda**: `5002` (JWT token validation)
-- **API Gateway**: `3000` (Request routing and orchestration)
-
-#### Docker Compose Services
-
-```yaml
-services:
-  backend:    # All .NET Lambda functions in one container
-    build: ./backend
-    ports:
-      - "5000:5000"  # Recipe Service
-      - "5001:5001"  # User Service  
-      - "5002:5002"  # Authorizer Service
-    extra_hosts:
-      - "host.docker.internal:host-gateway"  # MySQL host access
-    environment:
-      - DATABASE__CONNECTIONSTRING=Server=host.docker.internal;Database=RecipeApp_Dev;User=admin;Password=pass1234;
-      
-  gateway:    # Node.js API Gateway
-    build: ./backend-web
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-```
-
-### Development Workflow with Docker
-
-#### Option 1: Full Docker Stack
-```bash
-# Start all backend services as containers
-docker-compose up backend gateway
-
-# Start frontend natively
-cd frontend && npm start
-```
-
-#### Option 2: Hybrid Development
-```bash
-# Run specific services in containers
-docker-compose up backend
-
-# Run gateway natively for easier debugging
-cd backend-web && npm start
-
-# Run frontend natively
-cd frontend && npm start
-```
-
-#### Container Management Commands
-
-```bash
-# View running containers and logs
-docker-compose ps
-docker-compose logs backend
-docker-compose logs gateway
-
-# Rebuild containers after code changes
-docker-compose build backend
-docker-compose up backend --build
-
-# Stop and remove containers
-docker-compose down
-
-# View container resource usage
-docker stats
-```
-
-### Troubleshooting Docker Setup
-
-#### MySQL Connection Issues
-```bash
-# Test MySQL connectivity from host
-mysql -h localhost -u admin -p RecipeApp_Dev
-
-# Check container logs for connection errors
-docker-compose logs backend | grep -i mysql
-docker-compose logs backend | grep -i database
-```
-
-#### Container Networking
-```bash
-# Verify container can reach host
-docker-compose exec backend ping host.docker.internal
-
-# Check port bindings
-docker-compose port backend 5000
-docker-compose port gateway 3000
-```
-
-#### Performance Optimization
-```bash
-# Use bind mounts for development (hot reload)
-# Already configured in docker-compose.yml:
-volumes:
-  - ./backend:/app/src:ro  # Read-only source mount
-```
-
-### Docker vs Native Development
-
-| Aspect | Docker Setup | Native Setup |
-|--------|-------------|--------------|
-| **Setup Time** | Fast (one command) | Manual (multiple terminals) |
-| **Resource Usage** | Higher memory/CPU | Lower overhead |
-| **Hot Reload** | Supported via volumes | Native file watching |
-| **Debugging** | Container logs | Direct IDE integration |
-| **Database** | Host MySQL required | Any MySQL instance |
-| **Isolation** | Full service isolation | Shared host environment |
-
-Choose Docker for **consistent environments** and **quick setup**. Choose native development for **intensive debugging** and **resource optimization**.
 
 ## 📱 Core Features
 
