@@ -1,6 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "dev",
-    "DatabaseConnectionString": "Server=dev-mysql.amazonaws.com;Database=RecipeAppDev;User=devuser;Password=devpassword;"
-  }
-}
