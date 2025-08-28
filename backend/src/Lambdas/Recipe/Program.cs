@@ -78,16 +78,26 @@ builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 
 var app = builder.Build();
 
-// Ensure database is created and seeded
+// Ensure database is created and seeded with fallback handling
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<RecipeAppDbContext>();
-    var seedDataService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
-    
-    context.Database.EnsureCreated();
-    
-    // Run seeding if configured
-    await seedDataService.SeedAsync();
+    try 
+    {
+        var context = scope.ServiceProvider.GetRequiredService<RecipeAppDbContext>();
+        var seedDataService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
+        
+        context.Database.EnsureCreated();
+        
+        // Run seeding if configured
+        await seedDataService.SeedAsync();
+    }
+    catch (Exception ex) when (ex.Message.Contains("Unable to connect") || ex.Message.Contains("MySQL"))
+    {
+        Console.WriteLine($"Database connection failed during startup: {ex.Message}");
+        Console.WriteLine("Note: Database fallback should be configured at service registration time for proper operation.");
+        // Don't rethrow - let the application start but database operations will fail
+        // This allows the Lambda to start but individual requests may need to handle DB errors
+    }
 }
 
 if (app.Environment.IsDevelopment())

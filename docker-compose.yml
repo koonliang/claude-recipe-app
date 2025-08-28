@@ -9,8 +9,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DATABASE__CONNECTIONSTRING=Server=host.docker.internal;Database=RecipeApp_Dev;User=admin;Password=pass1234;
-      - DATABASE__USEIMMEMORYFALLBACK=false
-      - DATABASE_TYPE=mysql
+      - DATABASE__USEINMEMORYFALLBACK=true
+      - DATABASE_TYPE=auto
       - JWT__SECRETKEY=development-super-secret-key-that-must-be-at-least-32-characters-long-for-local-dev
       - JWT__ISSUER=RecipeApp-Development
       - JWT__AUDIENCE=RecipeApp-API-Development

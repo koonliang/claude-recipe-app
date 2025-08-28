@@ -1,11 +1,11 @@
 # Multi-stage build for .NET 9 backend services
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 5000
 EXPOSE 5001
 EXPOSE 5002
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy project files and build dependencies
@@ -48,7 +48,7 @@ COPY --from=build /app/authorizer ./authorizer/
 # Environment variables for Docker development
 ENV ASPNETCORE_ENVIRONMENT=Development
 ENV DATABASE__CONNECTIONSTRING="Server=mysql;Database=RecipeApp_Dev;User=admin;Password=pass1234;"
-ENV DATABASE__USEIMMEMORYFALLBACK=false
+ENV DATABASE__USEIMMEMORYFALLBACK=true
 ENV DATABASE_TYPE=mysql
 
 # Create a startup script with sequential startup to avoid database conflicts

@@ -6,7 +6,7 @@ Globals:
   Function:
     Timeout: 30
     MemorySize: 512
-    Runtime: dotnet9
+    Runtime: dotnet8
     Environment:
       Variables:
         ASPNETCORE_ENVIRONMENT: !Ref Environment
