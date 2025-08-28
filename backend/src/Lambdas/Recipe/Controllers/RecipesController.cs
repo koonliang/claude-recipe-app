@@ -138,7 +138,7 @@ public class RecipesController : ControllerBase
             if (result.Error.Contains("not found"))
                 return NotFound(new { error = result.Error });
             if (result.Error.Contains("Access denied"))
-                return Forbid();
+                return StatusCode(403, new { error = result.Error });
             return BadRequest(new { error = result.Error });
         }
 
@@ -158,7 +158,7 @@ public class RecipesController : ControllerBase
             if (result.Error.Contains("not found"))
                 return NotFound(new { error = result.Error });
             if (result.Error.Contains("Access denied"))
-                return Forbid();
+                return StatusCode(403, new { error = result.Error });
             return BadRequest(new { error = result.Error });
         }
 

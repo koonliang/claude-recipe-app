@@ -47,7 +47,7 @@ COPY --from=build /app/authorizer ./authorizer/
 
 # Environment variables for Docker development
 ENV ASPNETCORE_ENVIRONMENT=Development
-ENV DATABASE__CONNECTIONSTRING="Server=mysql;Database=RecipeApp_Dev;User=root;Password=dev_password;"
+ENV DATABASE__CONNECTIONSTRING="Server=mysql;Database=RecipeApp_Dev;User=admin;Password=pass1234;"
 ENV DATABASE__USEIMMEMORYFALLBACK=false
 ENV DATABASE_TYPE=mysql
 
