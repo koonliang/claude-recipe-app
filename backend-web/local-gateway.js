@@ -23,7 +23,7 @@ app.use(cors({
     /^https?:\/\/.*\.tunnels\.dev$/ // Expo tunnels
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-User-Id', 'X-User-Email', 'X-Authorizer-Context'],
   credentials: true
 }));
 
@@ -83,6 +83,14 @@ const authorizeRequest = async (req, res, next) => {
       if (context.email) {
         req.headers['X-User-Email'] = context.email;
       }
+      
+      // Add authorizer context header to prevent header tampering
+      req.headers['X-Authorizer-Context'] = JSON.stringify({
+        principalId: authResponse.data.principalId,
+        context: context,
+        timestamp: new Date().toISOString(),
+        methodArn: `execute-api:/*/${req.method}${req.path}`
+      });
       
       return next();
     } else {

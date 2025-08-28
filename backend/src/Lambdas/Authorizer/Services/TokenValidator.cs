@@ -37,7 +37,7 @@ public class TokenValidator : ITokenValidator
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
+            var key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
             
             var validationParameters = new TokenValidationParameters
             {
@@ -75,7 +75,7 @@ public class TokenValidator : ITokenValidator
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
+            var key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
             
             var validationParameters = new TokenValidationParameters
             {

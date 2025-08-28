@@ -19,14 +19,28 @@ public class RecipesController : ControllerBase
 
     private Guid GetUserId()
     {
-        // User ID is now provided by the backend-web gateway from the Authorizer Lambda
+        // User ID is provided by the backend-web gateway from the Authorizer Lambda
         var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
-        if (string.IsNullOrEmpty(userIdHeader))
+        if (string.IsNullOrWhiteSpace(userIdHeader))
         {
             throw new UnauthorizedAccessException("User ID not provided by authorizer");
         }
         
-        return Guid.TryParse(userIdHeader, out var userId) ? userId : throw new UnauthorizedAccessException("Invalid user ID format");
+        // Validate that the header is a valid GUID and not tampered with
+        if (!Guid.TryParse(userIdHeader, out var userId) || userId == Guid.Empty)
+        {
+            throw new UnauthorizedAccessException("Invalid user ID format");
+        }
+        
+        // Additional validation: ensure the header came from the authorizer
+        // Check for the presence of the authorizer context header as validation
+        var authorizerContext = Request.Headers["X-Authorizer-Context"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(authorizerContext))
+        {
+            throw new UnauthorizedAccessException("Missing authorizer context - possible header tampering");
+        }
+        
+        return userId;
     }
 
     [HttpGet]

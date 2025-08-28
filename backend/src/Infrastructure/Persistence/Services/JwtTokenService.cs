@@ -21,7 +21,7 @@ public class JwtTokenService : IJwtTokenService
     public string GenerateToken(User user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
+        var key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
 
         var claims = new[]
         {
@@ -56,7 +56,7 @@ public class JwtTokenService : IJwtTokenService
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtOptions.SecretKey);
+            var key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
 
             var validationParameters = new TokenValidationParameters
             {

@@ -3,6 +3,7 @@ using Core.Application.Abstractions;
 using Core.Application.Commands.Auth;
 using Core.Application.Interfaces;
 using Core.Domain.ValueObjects;
+using System.Security.Cryptography;
 
 namespace Core.Application.Handlers.Auth;
 
@@ -31,8 +32,8 @@ public class ForgotPasswordCommandHandler : ICommandHandler<ForgotPasswordComman
         if (user == null)
             return Result.Success(); // Don't reveal if email doesn't exist for security
 
-        // Generate reset token (secure random string)
-        var resetToken = Guid.NewGuid().ToString("N");
+        // Generate reset token (cryptographically secure random string)
+        var resetToken = GenerateSecureToken();
         var expiry = DateTime.UtcNow.AddHours(1); // Token expires in 1 hour
 
         // Set reset token
@@ -43,5 +44,17 @@ public class ForgotPasswordCommandHandler : ICommandHandler<ForgotPasswordComman
         await _emailService.SendPasswordResetEmailAsync(user.Email.Value, resetToken);
 
         return Result.Success();
+    }
+
+    private static string GenerateSecureToken()
+    {
+        // Generate 32 bytes of cryptographically secure random data
+        var tokenBytes = new byte[32];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(tokenBytes);
+        }
+        // Convert to URL-safe base64 string
+        return Convert.ToBase64String(tokenBytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }
