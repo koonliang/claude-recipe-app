@@ -31,7 +31,7 @@ print_header() {
 check_env_vars() {
     print_status "Checking required environment variables..."
     
-    local required_vars=("JWT_SECRET_KEY" "DATABASE_CONNECTION_STRING")
+    local required_vars=("JWT_SECRET_KEY")
     local missing_vars=()
     
     for var in "${required_vars[@]}"; do
@@ -88,7 +88,7 @@ init_terraform() {
 plan_deployment() {
     print_header "📋 Planning Terraform deployment..."
     
-    terraform plan -out=tfplan \
+    terraform plan \
         -var="jwt_secret_key=${JWT_SECRET_KEY}" \
         -var="jwt_issuer=${JWT_ISSUER:-recipe-app}" \
         -var="jwt_audience=${JWT_AUDIENCE:-recipe-app-users}" \
@@ -100,7 +100,7 @@ plan_deployment() {
 # Apply Terraform deployment
 apply_deployment() {
     print_header "🚀 Applying Terraform deployment..."
-    terraform apply tfplan
+    terraform apply -auto-approve
 }
 
 # Show deployment results

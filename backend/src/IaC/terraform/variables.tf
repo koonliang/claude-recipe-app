@@ -35,3 +35,15 @@ variable "database_connection_string" {
   sensitive   = true
   default     = ""
 }
+
+variable "enable_seed_data" {
+  description = "Enable database seeding on application startup"
+  type        = bool
+  default     = true
+}
+
+variable "seed_only_if_empty" {
+  description = "Only seed data if database is empty"
+  type        = bool
+  default     = false
+}

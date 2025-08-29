@@ -135,9 +135,23 @@ resource "aws_api_gateway_integration" "auth_options" {
   type        = "MOCK"
 
   request_templates = {
-    "application/json" = jsonencode({
-      statusCode = 200
-    })
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+
+resource "aws_api_gateway_integration_response" "auth_options" {
+  rest_api_id = aws_api_gateway_rest_api.recipe_api.id
+  resource_id = aws_api_gateway_resource.auth_proxy.id
+  http_method = aws_api_gateway_method.auth_options.http_method
+  status_code = "200"
+
+  depends_on = [aws_api_gateway_method_response.auth_options]
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
 }
 
@@ -154,18 +168,6 @@ resource "aws_api_gateway_method_response" "auth_options" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "auth_options" {
-  rest_api_id = aws_api_gateway_rest_api.recipe_api.id
-  resource_id = aws_api_gateway_resource.auth_proxy.id
-  http_method = aws_api_gateway_method.auth_options.http_method
-  status_code = aws_api_gateway_method_response.auth_options.status_code
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization,X-Requested-With,X-User-Id'"
-  }
-}
 
 # CORS for auth profile endpoint
 resource "aws_api_gateway_method" "auth_profile_options" {
@@ -182,9 +184,7 @@ resource "aws_api_gateway_integration" "auth_profile_options" {
   type        = "MOCK"
 
   request_templates = {
-    "application/json" = jsonencode({
-      statusCode = 200
-    })
+    "application/json" = "{\"statusCode\": 200}"
   }
 }
 
@@ -193,6 +193,10 @@ resource "aws_api_gateway_method_response" "auth_profile_options" {
   resource_id = aws_api_gateway_resource.auth_profile.id
   http_method = aws_api_gateway_method.auth_profile_options.http_method
   status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = true
@@ -205,11 +209,13 @@ resource "aws_api_gateway_integration_response" "auth_profile_options" {
   rest_api_id = aws_api_gateway_rest_api.recipe_api.id
   resource_id = aws_api_gateway_resource.auth_profile.id
   http_method = aws_api_gateway_method.auth_profile_options.http_method
-  status_code = aws_api_gateway_method_response.auth_profile_options.status_code
+  status_code = "200"
+
+  depends_on = [aws_api_gateway_method_response.auth_profile_options]
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization,X-Requested-With'"
   }
 }
@@ -229,9 +235,7 @@ resource "aws_api_gateway_integration" "recipes_options" {
   type        = "MOCK"
 
   request_templates = {
-    "application/json" = jsonencode({
-      statusCode = 200
-    })
+    "application/json" = "{\"statusCode\": 200}"
   }
 }
 
@@ -252,11 +256,13 @@ resource "aws_api_gateway_integration_response" "recipes_options" {
   rest_api_id = aws_api_gateway_rest_api.recipe_api.id
   resource_id = aws_api_gateway_resource.recipes_proxy.id
   http_method = aws_api_gateway_method.recipes_options.http_method
-  status_code = aws_api_gateway_method_response.recipes_options.status_code
+  status_code = "200"
+
+  depends_on = [aws_api_gateway_method_response.recipes_options]
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization,X-Requested-With'"
   }
 }
@@ -276,9 +282,7 @@ resource "aws_api_gateway_integration" "recipes_root_options" {
   type        = "MOCK"
 
   request_templates = {
-    "application/json" = jsonencode({
-      statusCode = 200
-    })
+    "application/json" = "{\"statusCode\": 200}"
   }
 }
 
@@ -299,11 +303,13 @@ resource "aws_api_gateway_integration_response" "recipes_root_options" {
   rest_api_id = aws_api_gateway_rest_api.recipe_api.id
   resource_id = aws_api_gateway_resource.recipes.id
   http_method = aws_api_gateway_method.recipes_root_options.http_method
-  status_code = aws_api_gateway_method_response.recipes_root_options.status_code
+  status_code = "200"
+
+  depends_on = [aws_api_gateway_method_response.recipes_root_options]
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization,X-Requested-With'"
   }
 }
@@ -346,6 +352,10 @@ resource "aws_api_gateway_deployment" "recipe_api_deployment" {
       aws_api_gateway_integration.auth_profile_integration.id,
       aws_api_gateway_integration.recipes_integration.id,
       aws_api_gateway_integration.recipes_root_integration.id,
+      aws_api_gateway_method.auth_options.id,
+      aws_api_gateway_integration.auth_options.id,
+      aws_api_gateway_integration_response.auth_options.id,
+      aws_api_gateway_method_response.auth_options.id,
     ]))
   }
 

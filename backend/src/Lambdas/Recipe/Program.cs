@@ -35,17 +35,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy
-            .WithOrigins(
-                "http://localhost:8081",      // Expo Dev Server
-                "exp://localhost:8081",       // Expo tunneling
-                "http://127.0.0.1:8081",     // Alternative localhost
-                "http://192.168.1.100:8081", // Common local network IP (adjust as needed)
-                "exp://192.168.1.100:8081"   // Expo on local network
-            )
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
     
     // Allow all origins for development (less secure but easier for development)
@@ -112,7 +104,7 @@ if (app.Environment.IsDevelopment())
 else
 {
     // Use more restrictive CORS in production
-    app.UseCors("AllowFrontend");
+    app.UseCors("AllowAll");
 }
 
 app.UseHttpsRedirection();

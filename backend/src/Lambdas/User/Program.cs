@@ -33,6 +33,24 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+    
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // Add configuration options with validation
 builder.Services.AddConfigurationOptions(builder.Configuration);
 
@@ -103,7 +121,7 @@ if (app.Environment.IsDevelopment())
 else
 {
     // Use more restrictive CORS in production
-    app.UseCors("AllowFrontend");
+    app.UseCors("AllowAll");
 }
 
 app.UseHttpsRedirection();
