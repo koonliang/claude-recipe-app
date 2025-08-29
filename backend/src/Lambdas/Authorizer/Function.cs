@@ -57,6 +57,7 @@ public class Function
 
     public APIGatewayCustomAuthorizerResponse FunctionHandler(APIGatewayCustomAuthorizerRequest request, ILambdaContext context)
     {
+        Console.WriteLine("=== AUTHORIZER LAMBDA CALLED ===");
         _logger.LogInformation("Processing authorization request for method: {Method}, resource: {Resource}", 
             request.HttpMethod, request.MethodArn);
 
@@ -73,13 +74,26 @@ public class Function
                 var userId = principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "unknown";
                 var email = principal?.FindFirst(ClaimTypes.Email)?.Value ?? "";
                 
-                var policy = GeneratePolicy(userId, "Allow", request.MethodArn, new Dictionary<string, object>
+                // Set context data that will be available as headers in downstream Lambda
+                // For REQUEST authorizers, use keys without "X-" prefix - API Gateway will map them to headers
+                var contextData = new Dictionary<string, object>
                 {
+                    // These will be accessible as context.authorizer.userId and context.authorizer.email in API Gateway
                     { "userId", userId },
                     { "email", email }
-                });
+                };
                 
-                _logger.LogInformation("Authorization granted for user: {UserId}", userId);
+                Console.WriteLine($"=== SETTING AUTHORIZER CONTEXT ===");
+                Console.WriteLine($"UserId: {userId}");
+                Console.WriteLine($"Email: {email}");
+                _logger.LogInformation("Setting authorizer context: userId={UserId}, email={Email}", userId, email);
+                _logger.LogInformation("Context will include headers: X-User-Id={UserId}, X-Authorizer-Context={Email}", userId, email);
+                
+                var policy = GeneratePolicy(userId, "Allow", request.MethodArn, contextData);
+                
+                _logger.LogInformation("Authorization granted for user: {UserId}. Policy context keys: {ContextKeys}", 
+                    userId, string.Join(",", contextData.Keys));
+                
                 return policy;
             }
             else
@@ -132,7 +146,9 @@ public class Function
             foreach (var kvp in context)
             {
                 response.Context.Add(kvp.Key, kvp.Value);
+                Console.WriteLine($"Adding context: {kvp.Key} = {kvp.Value}");
             }
+            Console.WriteLine($"Total context items: {response.Context.Count}");
         }
 
         return response;

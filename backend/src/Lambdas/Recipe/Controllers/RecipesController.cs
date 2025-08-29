@@ -3,6 +3,9 @@ using Core.Application.DTOs;
 using Core.Application.Queries.Recipe;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Amazon.Lambda.AspNetCoreServer;
+using Amazon.Lambda.Core;
+using Amazon.Lambda.APIGatewayEvents;
 
 namespace Recipe.Controllers;
 
@@ -19,28 +22,89 @@ public class RecipesController : ControllerBase
 
     private Guid GetUserId()
     {
-        // User ID is provided by the backend-web gateway from the Authorizer Lambda
-        var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(userIdHeader))
+        // Debug: Log all headers to see what's being received
+        Console.WriteLine("=== Recipe Lambda Headers Debug ===");
+        foreach (var header in Request.Headers)
         {
-            throw new UnauthorizedAccessException("User ID not provided by authorizer");
+            Console.WriteLine($"Header: {header.Key} = {string.Join(", ", header.Value)}");
+        }
+        Console.WriteLine("================================");
+
+        // Debug: Check what's available in HttpContext
+        Console.WriteLine("=== HttpContext Debug ===");
+        Console.WriteLine($"HttpContext.Items count: {HttpContext.Items.Count}");
+        foreach (var item in HttpContext.Items)
+        {
+            Console.WriteLine($"HttpContext.Items[{item.Key}] = {item.Value?.GetType().Name}");
         }
         
-        // Validate that the header is a valid GUID and not tampered with
-        if (!Guid.TryParse(userIdHeader, out var userId) || userId == Guid.Empty)
+        var lambdaContext = HttpContext.Features.Get<ILambdaContext>();
+        Console.WriteLine($"Lambda context available: {lambdaContext != null}");
+        Console.WriteLine("======================");
+
+        // For AWS_PROXY integration, authorizer context is available in the APIGatewayProxyRequest
+        if (HttpContext.Items.TryGetValue("LambdaRequestObject", out var requestObj) && requestObj is APIGatewayProxyRequest apiGatewayRequest)
         {
-            throw new UnauthorizedAccessException("Invalid user ID format");
+            Console.WriteLine("=== APIGatewayProxyRequest Found ===");
+            Console.WriteLine($"Request ID: {apiGatewayRequest.RequestContext?.RequestId}");
+
+            if (apiGatewayRequest.RequestContext?.Authorizer != null)
+            {
+                Console.WriteLine("=== Authorizer Context Debug ===");
+                foreach (var kvp in apiGatewayRequest.RequestContext.Authorizer)
+                {
+                    Console.WriteLine($"Authorizer[{kvp.Key}] = {kvp.Value}");
+                }
+                Console.WriteLine("==============================");
+
+                if (apiGatewayRequest.RequestContext.Authorizer.TryGetValue("userId", out var userIdObj) && userIdObj != null)
+                {
+                    var userIdString = userIdObj.ToString();
+                    if (Guid.TryParse(userIdString, out var userId) && userId != Guid.Empty)
+                    {
+                        Console.WriteLine($"Successfully extracted userId: {userId}");
+                        return userId;
+                    }
+                    throw new UnauthorizedAccessException($"Invalid user ID format: {userIdString}");
+                }
+                else
+                {
+                    Console.WriteLine("userId key not found in authorizer context");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Authorizer context is null");
+            }
         }
-        
-        // Additional validation: ensure the header came from the authorizer
-        // Check for the presence of the authorizer context header as validation
-        var authorizerContext = Request.Headers["X-Authorizer-Context"].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(authorizerContext))
+        else
         {
-            throw new UnauthorizedAccessException("Missing authorizer context - possible header tampering");
+            Console.WriteLine("LambdaRequestObject not found or not APIGatewayProxyRequest type");
+            // User ID is provided by the backend-web gateway from the Authorizer Lambda
+            var userIdHeader = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(userIdHeader))
+            {
+                throw new UnauthorizedAccessException("User ID not provided by authorizer");
+            }
+            
+            // Validate that the header is a valid GUID and not tampered with
+            if (!Guid.TryParse(userIdHeader, out var userId) || userId == Guid.Empty)
+            {
+                throw new UnauthorizedAccessException("Invalid user ID format");
+            }
+            
+            // Additional validation: ensure the header came from the authorizer
+            // Check for the presence of the authorizer context header as validation
+            var authorizerContext = Request.Headers["X-Authorizer-Context"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(authorizerContext))
+            {
+                throw new UnauthorizedAccessException("Missing authorizer context - possible header tampering");
+            }
+            
+            return userId;
         }
-        
-        return userId;
+
+        throw new UnauthorizedAccessException("User ID not provided by authorizer - authorizer context not found");
     }
 
     [HttpGet]
