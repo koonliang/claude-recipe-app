@@ -6,7 +6,7 @@ echo "Building Lambda functions..."
 # Create lambdas directory
 mkdir -p lambdas
 
-cd /mnt/c/projects/claude/claude-recipe-app/backend
+cd ../../..
 
 # Build User Lambda
 echo "Building User Lambda..."
@@ -22,7 +22,7 @@ with zipfile.ZipFile('../../../../src/IaC/terraform/lambdas/user-lambda.zip', 'w
         for file in files:
             zf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), '.'))
 "
-cd /mnt/c/projects/claude/claude-recipe-app/backend
+cd ../../../..
 
 # Build Recipe Lambda
 echo "Building Recipe Lambda..."
@@ -38,8 +38,7 @@ with zipfile.ZipFile('../../../../src/IaC/terraform/lambdas/recipe-lambda.zip', 
         for file in files:
             zf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), '.'))
 "
-cd /mnt/c/projects/claude/claude-recipe-app/backend
-
+cd ../../../..
 # Build Authorizer Lambda
 echo "Building Authorizer Lambda..."
 cd src/Lambdas/Authorizer
@@ -54,8 +53,8 @@ with zipfile.ZipFile('../../../../src/IaC/terraform/lambdas/authorizer-lambda.zi
         for file in files:
             zf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), '.'))
 "
-
-echo "✅ All Lambda functions built successfully!"
-cd /mnt/c/projects/claude/claude-recipe-app/backend/src/IaC/terraform
+pwd
+echo "All Lambda functions built successfully!"
+cd ../../../../src/IaC/terraform
 echo "Generated files:"
 ls -la lambdas/

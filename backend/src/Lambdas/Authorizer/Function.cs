@@ -111,11 +111,29 @@ public class Function
 
     private static string ExtractToken(APIGatewayCustomAuthorizerRequest request)
     {
-        if (request.Headers?.TryGetValue("Authorization", out var authHeader) == true)
+        Console.WriteLine($"=== TOKEN EXTRACTION DEBUG ===");
+        Console.WriteLine($"Headers count: {request.Headers?.Count ?? 0}");
+        Console.WriteLine($"AuthorizationToken: {request.AuthorizationToken ?? "null"}");
+        
+        if (request.Headers != null)
         {
+            foreach (var header in request.Headers)
+            {
+                Console.WriteLine($"Header: {header.Key} = {header.Value}");
+            }
+        }
+        
+        // Try different header name variations
+        string? authHeader = null;
+        
+        if (request.Headers?.TryGetValue("Authorization", out authHeader) == true ||
+            request.Headers?.TryGetValue("authorization", out authHeader) == true)
+        {
+            Console.WriteLine($"Found Authorization header: {authHeader}");
             return authHeader.StartsWith("Bearer ") ? authHeader[7..] : authHeader;
         }
         
+        Console.WriteLine($"No Authorization header found, using AuthorizationToken: {request.AuthorizationToken ?? "null"}");
         return request.AuthorizationToken ?? string.Empty;
     }
 
