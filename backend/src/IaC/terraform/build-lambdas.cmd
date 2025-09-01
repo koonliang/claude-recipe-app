@@ -90,5 +90,3 @@ exit /b 1
 
 :end
 endlocal
-
-pause

@@ -149,9 +149,11 @@ resource "aws_api_gateway_integration" "auth_root_options" {
   rest_api_id = aws_api_gateway_rest_api.recipe_api.id
   resource_id = aws_api_gateway_resource.auth.id
   http_method = aws_api_gateway_method.auth_root_options.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.user_lambda.invoke_arn
+  type        = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
 }
 
 resource "aws_api_gateway_method_response" "auth_root_options" {
@@ -196,9 +198,11 @@ resource "aws_api_gateway_integration" "auth_options" {
   rest_api_id = aws_api_gateway_rest_api.recipe_api.id
   resource_id = aws_api_gateway_resource.auth_proxy.id
   http_method = aws_api_gateway_method.auth_options.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.user_lambda.invoke_arn
+  type        = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
 }
 
 resource "aws_api_gateway_method_response" "auth_options" {
@@ -243,9 +247,11 @@ resource "aws_api_gateway_integration" "recipes_root_options" {
   rest_api_id = aws_api_gateway_rest_api.recipe_api.id
   resource_id = aws_api_gateway_resource.recipes.id
   http_method = aws_api_gateway_method.recipes_root_options.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.recipe_lambda.invoke_arn
+  type        = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
 }
 
 resource "aws_api_gateway_method_response" "recipes_root_options" {
@@ -290,9 +296,11 @@ resource "aws_api_gateway_integration" "recipes_options" {
   rest_api_id = aws_api_gateway_rest_api.recipe_api.id
   resource_id = aws_api_gateway_resource.recipes_proxy.id
   http_method = aws_api_gateway_method.recipes_options.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.recipe_lambda.invoke_arn
+  type        = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
 }
 
 resource "aws_api_gateway_method_response" "recipes_options" {
