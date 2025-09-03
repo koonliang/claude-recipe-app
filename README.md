@@ -2,7 +2,7 @@
 
 A full-stack mobile recipe management application built with React Native and .NET, featuring clean architecture, serverless backend, and seamless local development experience.
 
-This project is implemented from scratch using Claude Code, no other project reference is used.
+This project has been archived, please refer to https://github.com/koonliang-organization/recipe-app for further development.
 
 ## 🎯 Overview
 
